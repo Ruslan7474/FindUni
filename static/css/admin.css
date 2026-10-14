@@ -1,0 +1,252 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #264653;
+  --secondary: #1b3741;
+  --accent: #e9c46a;
+  --primary-fg: #fff;
+  --body-fg: #264653;
+  --body-bg: #f7f5ee;
+  --body-quiet-color: #64777e;
+  --body-loud-color: #1b3741;
+  --header-bg: #1b3741;
+  --header-color: #fff;
+  --breadcrumbs-bg: #f0ede3;
+  --breadcrumbs-fg: #526a73;
+  --link-fg: #256274;
+  --link-hover-color: #173b48;
+  --link-selected-fg: #1b3741;
+  --hairline-color: rgb(38 70 83 / 15%);
+  --border-color: rgb(38 70 83 / 18%);
+  --darkened-bg: #f0ede3;
+  --selected-bg: #f7f2e5;
+  --selected-row: #faf6eb;
+  font-family: "Manrope", sans-serif;
+}
+
+body,
+input,
+textarea,
+select,
+button,
+.paginator {
+  font-family: "Manrope", sans-serif;
+}
+
+#header {
+  min-height: 64px;
+  padding: 10px 24px;
+  background: #1b3741;
+}
+
+#branding {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#branding h1 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+#branding h1 a {
+  color: #fff;
+}
+
+.admin-brand-caption {
+  padding-left: 14px;
+  border-left: 1px solid rgb(255 255 255 / 25%);
+  color: rgb(255 255 255 / 75%);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#user-tools {
+  color: rgb(255 255 255 / 78%);
+  font-size: 12px;
+}
+
+#user-tools a,
+#user-tools button {
+  color: #fff;
+}
+
+div.breadcrumbs {
+  padding: 12px 24px;
+  background: #f0ede3;
+  color: #526a73;
+  font-size: 12px;
+}
+
+#content {
+  max-width: 1500px;
+  padding: 26px 28px 40px;
+}
+
+#content h1 {
+  margin: 0 0 22px;
+  color: #1b3741;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+#content-main .module,
+#changelist,
+#content-related .module {
+  overflow: hidden;
+  border: 1px solid rgb(38 70 83 / 12%);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(38 70 83 / 5%);
+}
+
+.module caption,
+.module h2,
+.module h3,
+.inline-group h2 {
+  padding: 13px 16px;
+  background: #264653;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#content-main .module table th,
+#content-main .module table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid rgb(38 70 83 / 8%);
+}
+
+#content-main .module table tr:last-child th,
+#content-main .module table tr:last-child td {
+  border-bottom: 0;
+}
+
+#content-main .module table tr:hover td,
+#result_list tbody tr:hover {
+  background: #faf7ee;
+}
+
+#result_list thead th {
+  padding: 11px 12px;
+  background: #f0ede3;
+  color: #264653;
+  font-weight: 800;
+}
+
+#result_list tbody td,
+#result_list tbody th {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgb(38 70 83 / 8%);
+}
+
+.form-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgb(38 70 83 / 8%);
+}
+
+.form-row:last-child {
+  border-bottom: 0;
+}
+
+input,
+textarea,
+select,
+.vTextField,
+.vLargeTextField {
+  border-radius: 5px;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.vTextField:focus,
+.vLargeTextField:focus {
+  border-color: #a47e24;
+  outline: 2px solid rgb(233 196 106 / 38%);
+  outline-offset: 1px;
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.button.default,
+input[type="submit"].default,
+.submit-row input.default {
+  background: #264653;
+}
+
+.button.default:hover,
+input[type="submit"].default:hover,
+.submit-row input.default:hover {
+  background: #1b3741;
+}
+
+.object-tools a {
+  border-radius: 6px;
+  background: #264653;
+  font-weight: 700;
+}
+
+.object-tools a:hover {
+  background: #1b3741;
+}
+
+.messagelist li {
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+#result_list {
+  width: 100%;
+  table-layout: fixed;
+}
+
+#result_list th,
+#result_list td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#result_list .action-checkbox-column {
+  width: 34px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #e9c46a;
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  #header {
+    padding: 10px 16px;
+  }
+
+  #content {
+    padding: 22px 16px 32px;
+  }
+
+  #branding {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .admin-brand-caption {
+    padding: 0;
+    border: 0;
+    font-size: 10px;
+  }
+}

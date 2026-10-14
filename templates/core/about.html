@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}О FindUni — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/about.css' %}?v=1">{% endblock %}
+{% block content %}
+<div class="about-page">
+	<section class="about-hero" aria-labelledby="about-title">
+		<div class="about-hero-inner">
+			<div class="about-hero-copy">
+				<p class="section-kicker">О платформе</p>
+				<h1 id="about-title">Образование не должно быть <span>лабиринтом</span></h1>
+				<p class="about-lead">FindUni помогает абитуриентам находить и сравнивать университеты и колледжи по всему миру, изучать программы и условия поступления в одном месте.</p>
+				<div class="about-hero-actions">
+					<a class="button" href="{% url 'institution-list' %}">Начать поиск <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+					<a class="button button-outline" href="#mission">Наша миссия</a>
+				</div>
+			</div>
+			<div class="about-hero-visual">
+				<div class="about-photo-frame">
+					<img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&amp;fit=crop&amp;w=1200&amp;q=85" alt="Студенты вместе работают над учебным проектом">
+				</div>
+				<div class="about-photo-note"><strong>От первого поиска до заявления</strong><span>Сравнивай условия и принимай решение на основе информации.</span></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="about-mission" id="mission" aria-labelledby="mission-title">
+		<div class="about-mission-inner">
+			<div><p class="about-eyebrow">Зачем мы здесь</p><p class="about-mission-intro">Выбор образования влияет на годы жизни. Для такого решения недостаточно рекламного буклета.</p></div>
+			<div><h2 id="mission-title">Наша миссия — дать человеку не просто список вузов, а <span>уверенность в своём выборе.</span></h2><p>Мы собираем важную информацию в одном месте, показываем реальные условия поступления и помогаем пройти путь от первого поиска до заявления.</p></div>
+		</div>
+	</section>
+
+	<section class="about-facts" aria-label="Данные FindUni">
+		<article class="about-fact"><strong>{{ institution_count }}</strong><h2>Учебные заведения</h2><p>зарегистрированы в FindUni</p></article>
+		<article class="about-fact"><strong>{{ program_count }}</strong><h2>Образовательные программы</h2><p>добавлены в систему заведениями</p></article>
+	</section>
+
+	<section class="about-values" id="values" aria-labelledby="values-title">
+		<div class="about-section-heading"><p class="section-kicker">Наши принципы</p><h2 id="values-title">На чём построен FindUni</h2><p>Принципы, которыми мы руководствуемся при создании платформы.</p></div>
+		<div class="about-values-grid">
+			<article><span>/ 01</span><h3>Понятность</h3><p>Важная информация и следующие шаги должны быть ясны абитуриенту.</p></article>
+			<article><span>/ 02</span><h3>Честность</h3><p>Показываем реальные сведения из профилей заведений, не подменяя их выдуманными цифрами.</p></article>
+			<article><span>/ 03</span><h3>Равный доступ</h3><p>Помогаем сравнивать возможности независимо от города и страны.</p></article>
+			<article><span>/ 04</span><h3>Приватность</h3><p>Личные данные абитуриента доступны только в рамках правил доступа платформы.</p></article>
+		</div>
+	</section>
+
+	<section class="about-faq" id="faq" aria-labelledby="faq-title">
+		<div class="about-faq-intro"><p class="section-kicker">Коротко о важном</p><h2 id="faq-title">Частые вопросы</h2><p>Ответы о поиске, программах и подаче заявлений в FindUni.</p></div>
+		<div class="about-faq-list">
+			<details open><summary>FindUni — это бесплатный сервис?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Поиск, сравнение заведений, создание профиля и отправка заявлений доступны абитуриентам бесплатно.</p></details>
+			<details><summary>Откуда берётся информация о программах?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Информацию добавляют учебные заведения. Перед публикацией профиль проходит модерацию.</p></details>
+			<details><summary>Кто увидит мои оценки и контакты?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Полные данные доступны владельцу профиля, администраторам и связанному с заявлением учебному заведению согласно настройкам приватности.</p></details>
+			<details><summary>Можно ли подать заявления в несколько мест?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Да. Вы можете подать заявления в несколько заведений и отслеживать их статусы в личном кабинете.</p></details>
+		</div>
+	</section>
+
+	<section class="about-cta" aria-labelledby="about-cta-title">
+		<div><p>Найди своё направление</p><h2 id="about-cta-title">Будущее начинается с понятного выбора</h2><span>Изучи программы и условия поступления без лишней сложности.</span></div>
+		<a class="button" href="{% url 'institution-list' %}">Открыть каталог <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+	</section>
+</div>
+{% endblock %}

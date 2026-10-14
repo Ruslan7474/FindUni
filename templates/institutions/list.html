@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Заведения — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/catalog-lists.css' %}?v=1">{% endblock %}
+{% block content %}
+<section>
+  <h1>Заведения</h1>
+  <form method="get" class="filters institution-filters">
+    <input class="filter-search-input" name="q" value="{{ request.GET.q }}" placeholder="Поиск по названию или городу">
+    <div class="city-picker filter-picker custom-picker">
+      <input type="hidden" name="city" value="{{ request.GET.city }}">
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{{ request.GET.city|default:'Город' }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="Фильтр по городу">
+        <button class="picker-option" type="button" data-value="">Все города</button>
+        {% for city in cities %}<button class="picker-option" type="button" data-value="{{ city }}">{{ city }}</button>{% endfor %}
+      </div>
+    </div>
+    <div class="city-picker filter-picker custom-picker">
+      <input type="hidden" name="type" value="{{ request.GET.type }}">
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% for value, label in types %}{% if request.GET.type == value %}{{ label }}{% endif %}{% endfor %}{% if not request.GET.type %}Тип заведения{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="Фильтр по типу заведения">
+        <button class="picker-option" type="button" data-value="">Все типы</button>
+        {% for value, label in types %}<button class="picker-option" type="button" data-value="{{ value }}">{{ label }}</button>{% endfor %}
+      </div>
+    </div>
+    <input name="direction" value="{{ request.GET.direction }}" placeholder="Направление">
+    <input name="max_price" type="number" min="0" value="{{ request.GET.max_price }}" placeholder="Максимальная цена">
+    <div class="city-picker filter-picker custom-picker">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% if sort == 'name' %}Название{% elif sort == 'price' %}Цена{% else %}Рейтинг{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="Сортировка заведений">
+        <button class="picker-option" type="button" data-value="rating">Рейтинг</button>
+        <button class="picker-option" type="button" data-value="name">Название</button>
+        <button class="picker-option" type="button" data-value="price">Цена</button>
+      </div>
+    </div>
+    <button class="button" type="submit">Фильтры</button>
+  </form>
+  <div class="cards institution-list-cards">
+    {% for institution in institutions %}
+      <article class="institution-list-card">
+        <a class="institution-list-photo" href="{% url 'institution-detail' institution.pk %}" aria-label="Открыть {{ institution.name }}">
+          {% with photo=institution.photos.all|first %}{% if photo %}<img src="{{ photo.image.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% elif institution.logo %}<img src="{{ institution.logo.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% else %}<svg class="icon" aria-hidden="true"><use href="#icon-building"/></svg>{% endif %}{% endwith %}
+        </a>
+        <div class="institution-list-info">
+          <h2><a href="{% url 'institution-detail' institution.pk %}">{{ institution.name }}</a></h2>
+          <p>{{ institution.city }} · {{ institution.get_institution_type_display }}</p>
+          <p>Рейтинг: {% if institution.rating_count %}{{ institution.rating|floatformat:1 }} ({{ institution.rating_count }}){% else %}Нет оценок{% endif %}</p>
+          <a class="button button-outline" href="{% url 'institution-detail' institution.pk %}">Открыть заведение <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </div>
+      </article>
+    {% empty %}<p>Заведения не найдены.</p>{% endfor %}
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}<nav class="catalog-pagination" aria-label="Страницы заведений">
+    {% if page_obj.has_previous %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">Назад</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Назад</span>{% endif %}
+    <span class="catalog-pagination-status">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">Дальше</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Дальше</span>{% endif %}
+  </nav>{% endif %}
+</section>
+{% endblock %}

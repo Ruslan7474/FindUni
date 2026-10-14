@@ -1,0 +1,14 @@
+.application-form-card{max-width:680px}
+.application-form-card form{display:grid;gap:14px}
+.application-documents{display:grid;gap:9px;padding:17px;border:1px solid var(--line);border-radius:12px;background:var(--white)}
+.application-documents h2{margin:0;font-size:16px}
+.application-documents-note,.application-documents-empty,.application-documents-loading{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.application-document-fields{display:grid;gap:11px}
+.application-document-field{display:grid;gap:6px;padding-top:10px;border-top:1px solid var(--line)}
+.application-document-field label{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:5px;font-size:12px;font-weight:800}
+.application-document-field label span{color:var(--muted);font-size:10px;font-weight:600}
+.application-document-field input[type="file"]{width:100%;min-width:0;color:var(--ink);font:inherit;font-size:12px}
+.application-document-field small{color:var(--muted);font-size:10px}
+.application-document-field .errorlist{margin:0;color:#a63f36;font-size:11px}
+.theme-dark .application-documents{background:var(--white)}
+@media(max-width:540px){.application-documents{padding:14px}.application-form-card form>.button{width:100%}}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ display_name|default:'Профиль абитуриента' }} — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/profile-comments.css' %}?v=1"><link rel="stylesheet" href="{% static 'css/student-grades.css' %}?v=1">{% endblock %}
+{% block content %}
+<section class="profile-page student-profile-page">
+  {% for message in messages %}<p class="profile-save-notice" role="status">{{ message }}</p>{% endfor %}
+  <header class="student-profile-hero">
+    <div class="profile-avatar profile-avatar-large">{% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="Фото профиля {{ display_name }}">{% else %}<span aria-hidden="true">{{ display_name|default:'А'|first|upper }}</span>{% endif %}</div>
+    <div class="student-profile-intro"><div class="profile-title-line"><h1>{{ display_name|default:'Профиль абитуриента' }}</h1><span class="profile-role-badge">Абитуриент</span></div>{% if can_view_full and profile.bio %}<p class="profile-summary">{{ profile.bio }}</p>{% endif %}{% if can_view_full and profile.city %}<p class="profile-location"><svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>{{ profile.city }}</p>{% endif %}</div>
+    {% if user.is_authenticated and user.pk == profile.user_id and not preview_as_guest %}<a class="button profile-edit-button" href="{% url 'dashboard' %}">Редактировать в кабинете</a>{% elif user.is_authenticated and user.role == 'student' and not preview_as_guest %}<form class="student-friend-action" method="post" action="{% url 'manage-friend' profile.user_id %}">{% csrf_token %}{% if friendship_state == 'friends' %}<input type="hidden" name="action" value="remove"><button class="button button-outline" type="submit">Удалить из друзей</button>{% elif friendship_state == 'received' %}<input type="hidden" name="action" value="accept"><button class="button" type="submit">Принять запрос дружбы</button><button class="button button-outline" name="action" value="remove" type="submit">Отклонить</button>{% elif friendship_state == 'sent' %}<button class="button" type="button" disabled>Запрос отправлен</button>{% else %}<input type="hidden" name="action" value="request"><button class="button" type="submit">Добавить в друзья</button>{% endif %}</form>{% endif %}
+  </header>
+
+  {% if can_view_full %}{% include 'students/_grade_wheels.html' with show_grade_editor_link=is_owner %}{% endif %}
+
+  <div class="profile-content-grid">
+    <div class="profile-main-column">
+      {% if can_view_full %}
+        <section class="profile-panel"><p class="section-kicker">Информация</p><h2>О себе</h2><dl class="profile-facts"><div><dt>Дата рождения</dt><dd>{{ profile.date_of_birth|date:'j E Y'|default:'Не указана' }}</dd></div><div><dt>Национальность</dt><dd>{{ profile.nationality|default:'Не указана' }}</dd></div><div><dt>Гражданство</dt><dd>{{ profile.citizenship|default:'Не указано' }}</dd></div><div><dt>Email</dt><dd>{% if profile.email_visible %}{{ profile.user.email|default:'Не указан' }}{% else %}Скрыт настройками профиля{% endif %}</dd></div></dl><p>{{ profile.bio|default:'Описание пока не заполнено.' }}</p></section>
+        <section class="profile-panel"><p class="section-kicker">Результаты</p><h2>Тесты и экзамены</h2>{% if profile.test_scores.all %}<div class="profile-score-grid">{% for score in profile.test_scores.all %}<article class="profile-score-item"><p>{{ score.test_type }}</p><strong>{{ score.score }}</strong><time datetime="{{ score.date|date:'Y-m-d' }}">{{ score.date|date:'j E Y' }}</time></article>{% endfor %}</div>{% else %}<p class="profile-empty-state">Результаты тестов пока не добавлены.</p>{% endif %}</section>
+        <section class="profile-panel"><p class="section-kicker">Успеваемость</p><h2>Оценки и аттестат</h2>{% for grade in profile.grades.all %}<article class="profile-grade-item"><span>{{ grade.subject }}</span><strong>{{ grade.grade }}</strong></article>{% empty %}<p class="profile-empty-state">Оценки пока не добавлены.</p>{% endfor %}</section>
+      {% else %}
+        <section class="profile-privacy-panel profile-privacy-notice"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg><h2>Полный профиль закрыт</h2><p>Дата рождения, национальность, гражданство, описание, результаты и контакты доступны владельцу профиля, администраторам и учебным заведениям, связанным с заявлением.</p></section>
+      {% endif %}
+      <section class="profile-panel"><p class="section-kicker">Образование</p><h2>Где учился</h2>{% for entry in education %}<article class="profile-list-item"><span class="profile-list-icon"><svg class="icon" aria-hidden="true"><use href="#icon-book"/></svg></span><div><h3>{{ entry.institution_name }}</h3><p>{{ entry.get_level_display }}{% if entry.start_year %} · {{ entry.start_year }}{% endif %}{% if entry.end_year %}–{{ entry.end_year }}{% endif %}</p>{% if entry.specialty %}<p class="profile-item-description">{{ entry.specialty }}</p>{% endif %}</div></article>{% empty %}<p class="profile-empty-state">Образование пока не добавлено.</p>{% endfor %}</section>
+      <section class="profile-panel" id="comments"><div class="profile-panel-heading"><div><p class="section-kicker">Общение</p><h2>Комментарии</h2></div><span class="profile-count">{{ comment_count }}</span></div>
+        {% if can_interact_comments %}<form class="profile-comment-compose" method="post" action="{% url 'add-comment' profile.pk %}#comments">{% csrf_token %}<label class="visually-hidden" for="id_text">Напишите комментарий</label>{{ comment_form.text }}<button class="profile-comment-send" type="submit" aria-label="Отправить комментарий" title="Отправить комментарий"><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button></form>{% elif not user.is_authenticated and not preview_as_guest %}<p class="profile-empty-state"><a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Войдите</a>, чтобы оставить комментарий.</p>{% endif %}
+        <div class="profile-comment-list">{% for comment in comments %}{% include 'students/_comment_item.html' with is_reply=False %}{% empty %}<p class="profile-empty-state">Комментариев пока нет.</p>{% endfor %}</div>
+      </section>
+    </div>
+    <aside class="profile-side-column"><section class="profile-panel"><p class="section-kicker">Абитуриент</p><h2>Основная информация</h2><dl class="profile-facts">{% if can_view_full %}<div><dt>Город</dt><dd>{{ profile.city|default:'Не указан' }}</dd></div><div><dt>Дата рождения</dt><dd>{{ profile.date_of_birth|date:'j E Y'|default:'Не указана' }}</dd></div>{% endif %}</dl></section></aside>
+  </div>
+</section>
+{% endblock %}

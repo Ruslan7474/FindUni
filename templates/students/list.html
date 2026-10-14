@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Абитуриенты — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/students-list.css' %}?v=1"><link rel="stylesheet" href="{% static 'css/catalog-lists.css' %}?v=1">{% endblock %}
+{% block content %}
+<section class="student-list-page" aria-labelledby="student-list-title">
+	<div class="student-list-heading"><p class="section-kicker">Сообщество FindUni</p><h1 id="student-list-title">Абитуриенты</h1><p>Находи тех, кто тоже готовится к поступлению.</p></div>
+	<form method="get" class="student-list-tools" role="search">
+		<div class="student-search-form"><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><label class="visually-hidden" for="student-search-input">Поиск абитуриентов по имени, городу или месту обучения</label><input id="student-search-input" name="q" value="{{ request.GET.q }}" placeholder="Имя, город или учебное заведение"><button class="button" type="submit">Найти <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button></div>
+		<div class="student-filter-row">
+			<div class="city-picker custom-picker student-city-filter">
+				<input type="hidden" name="city" value="{{ selected_city }}">
+				<button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% if selected_city %}{{ selected_city }}{% else %}Все города{% endif %}</span><svg class="icon picker-chevron" aria-hidden="true"><use href="#icon-chevron"/></svg></button>
+				<div class="picker-menu" role="listbox" aria-label="Фильтр по городу"><button class="picker-option" type="button" data-value="">Все города</button>{% for city in cities %}<button class="picker-option" type="button" data-value="{{ city }}">{{ city }}</button>{% endfor %}</div>
+			</div>
+			<label class="student-institution-filter"><span class="visually-hidden">Фильтр по месту обучения</span><input name="institution" value="{{ institution_query }}" placeholder="Где учился: школа, колледж или вуз"></label>
+			<button class="button student-filter-submit" type="submit">Применить фильтры</button>
+		</div>
+	</form>
+	<div class="student-cards">
+		{% for student in students %}
+			<article class="student-card">
+				<div class="student-card-heading">
+					<a class="student-card-avatar" href="{% url 'student-detail' student.pk %}" aria-label="Открыть профиль: {{ student.full_name|default:student.user.get_full_name|default:'Абитуриент' }}">
+						{% if student.avatar %}<img src="{{ student.avatar.url }}" alt="Фото {{ student.full_name|default:student.user.get_full_name|default:'Абитуриент' }}" loading="lazy">{% else %}<span aria-hidden="true">{{ student.full_name|default:student.user.get_full_name|default:'А'|first|upper }}</span>{% endif %}
+					</a>
+					<div class="student-card-identity"><h2><a href="{% url 'student-detail' student.pk %}">{{ student.full_name|default:student.user.get_full_name|default:'Абитуриент' }}</a></h2>{% if student.city %}<p class="student-card-city"><svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>{{ student.city }}</p>{% endif %}</div>
+				</div>
+				{% if student.interests %}<div class="student-card-interests"><span>Интересующие направления</span><p>{{ student.interests }}</p></div>{% endif %}
+				<div class="student-card-education"><span>Образование</span>{% for entry in student.education.all %}<div><strong>{{ entry.institution_name }}</strong><p>{{ entry.get_level_display }}{% if entry.specialty %} · {{ entry.specialty }}{% endif %}</p></div>{% empty %}<p>Образование не указано.</p>{% endfor %}</div>
+				<a class="button button-outline student-card-open" href="{% url 'student-detail' student.pk %}">Открыть профиль <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+			</article>
+		{% empty %}<p class="student-list-empty">Абитуриенты не найдены.</p>{% endfor %}
+	</div>
+	{% if page_obj.paginator.num_pages > 1 %}<nav class="catalog-pagination" aria-label="Страницы абитуриентов">
+		{% if page_obj.has_previous %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">Назад</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Назад</span>{% endif %}
+		<span class="catalog-pagination-status">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+		{% if page_obj.has_next %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">Дальше</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Дальше</span>{% endif %}
+	</nav>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+.institution-list-cards{grid-template-columns:1fr;gap:13px}
+.institution-list-cards .institution-list-card{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:0;overflow:hidden;padding:0;border-radius:14px}
+.institution-list-photo{display:grid;min-height:180px;overflow:hidden;place-items:center;color:var(--muted);background:rgb(38 70 83 / 5%)}
+.institution-list-photo img{width:100%;height:100%;min-height:180px;object-fit:cover}
+.institution-list-photo>.icon{width:38px;height:38px}
+.institution-list-info{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:8px;padding:20px}
+.institution-list-info h2{margin:0;font-size:18px;line-height:1.4;overflow-wrap:anywhere}
+.institution-list-info h2 a:hover{color:var(--gold-deep)}
+.institution-list-info p{margin:0;color:var(--muted);font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.institution-list-info .button{min-height:38px;margin-top:auto;border:1px solid var(--line);color:var(--ink);background:transparent}
+.institution-list-info .button:hover{border-color:var(--gold);background:rgb(233 196 106 / 12%)}
+.institution-list-info .button .icon{width:16px;height:16px}
+.theme-dark .institution-list-photo{background:#172f38}
+.theme-dark .institution-list-info .button{color:var(--ink)}
+.catalog-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin:28px 0 8px}
+.catalog-pagination .button{min-height:40px;padding:0 15px}
+.catalog-pagination .button-outline{border:1px solid var(--line);color:var(--ink);background:transparent}
+.catalog-pagination .button-outline:hover:not(.is-disabled){border-color:var(--gold);background:rgb(233 196 106 / 12%)}
+.catalog-pagination .is-disabled{opacity:.48;cursor:not-allowed}
+.catalog-pagination-status{color:var(--muted);font-size:12px;font-weight:700}
+.theme-dark .catalog-pagination .button-outline{color:var(--ink)}
+@media(max-width:540px){.institution-list-cards .institution-list-card{grid-template-columns:1fr}.institution-list-photo,.institution-list-photo img{height:180px;min-height:180px}.institution-list-info{padding:17px}.catalog-pagination{gap:8px}.catalog-pagination .button{min-height:38px;padding-inline:11px;font-size:11px}.catalog-pagination-status{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.catalog-pagination .button,.institution-list-info .button{transition:none}}

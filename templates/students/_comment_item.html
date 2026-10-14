@@ -1,0 +1,23 @@
+<article class="profile-comment{% if is_reply %} profile-comment-reply{% endif %}" id="comment-{{ comment.pk }}">
+    {% with author_name=comment.author.student_profile.full_name|default:comment.author.institution_profile.name|default:comment.author.get_full_name|default:comment.author.get_role_display %}
+        <div class="profile-comment-heading">
+            <span class="profile-comment-avatar">
+                {% if comment.author.student_profile.avatar %}<img src="{{ comment.author.student_profile.avatar.url }}" alt="" loading="lazy">{% elif comment.author.institution_profile.logo %}<img src="{{ comment.author.institution_profile.logo.url }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">{{ author_name|first|upper }}</span>{% endif %}
+            </span>
+            <strong>{{ author_name }}</strong>
+            <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:'j E Y, H:i' }}</time>
+        </div>
+        <p class="profile-comment-text">{{ comment.text }}</p>
+        {% if can_interact_comments %}
+            {% with current_vote=comment.viewer_votes|first %}
+                <div class="profile-comment-actions">
+                    <p class="profile-comment-status" role="status" aria-live="polite" hidden></p>
+                    <form class="profile-comment-vote-form" method="post" action="{% url 'vote-comment' comment.pk %}#comments">{% csrf_token %}<input type="hidden" name="value" value="like"><button class="profile-comment-vote{% if current_vote.value == 'like' %} is-selected{% endif %}" type="submit" aria-label="Нравится" aria-pressed="{% if current_vote.value == 'like' %}true{% else %}false{% endif %}"><span aria-hidden="true">&#9650;</span><span>{{ comment.like_count }}</span></button></form>
+                    <form class="profile-comment-vote-form" method="post" action="{% url 'vote-comment' comment.pk %}#comments">{% csrf_token %}<input type="hidden" name="value" value="dislike"><button class="profile-comment-vote{% if current_vote.value == 'dislike' %} is-selected{% endif %}" type="submit" aria-label="Не нравится" aria-pressed="{% if current_vote.value == 'dislike' %}true{% else %}false{% endif %}"><span aria-hidden="true">&#9660;</span><span>{{ comment.dislike_count }}</span></button></form>
+                    {% if not is_reply %}<details class="profile-comment-reply-control"><summary>Ответить</summary><form method="post" action="{% url 'add-comment' profile.pk %}#comments">{% csrf_token %}<input type="hidden" name="parent_id" value="{{ comment.pk }}"><label class="visually-hidden" for="reply-text-{{ comment.pk }}">Ответ на комментарий</label><textarea id="reply-text-{{ comment.pk }}" name="text" maxlength="500" rows="2" placeholder="Напишите ответ..."></textarea><button class="button button-small" type="submit">Отправить</button></form></details>{% endif %}
+                </div>
+            {% endwith %}
+        {% endif %}
+        {% if not is_reply and comment.visible_replies %}<div class="profile-comment-replies">{% for reply in comment.visible_replies %}{% include 'students/_comment_item.html' with comment=reply is_reply=True %}{% endfor %}</div>{% endif %}
+    {% endwith %}
+</article>

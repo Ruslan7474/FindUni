@@ -1,0 +1,21 @@
+.institution-program-editor{display:grid;gap:13px;margin:0 0 18px}
+.institution-program-editor>summary{width:max-content;max-width:100%;min-height:40px;padding:0 15px;list-style:none;cursor:pointer}
+.institution-program-editor>summary::-webkit-details-marker{display:none}
+.institution-program-editor>summary::marker{content:""}
+.institution-program-editor>summary::before{content:"+";font-size:18px;line-height:1}
+.institution-program-editor[open]>summary::before{content:"−"}
+.institution-program-editor>summary:hover{transform:translateY(-1px)}
+.institution-program-editor-form{display:grid;gap:13px}
+.institution-program-edit-item{display:grid;gap:10px;min-width:0;padding:17px;border:1px solid var(--line);border-radius:12px}
+.institution-program-edit-item legend{padding:0 6px;font-size:12px;font-weight:800}
+.institution-program-edit-item p{display:grid;gap:6px;margin:0}
+.institution-program-edit-item label{font-size:12px;font-weight:700}
+.institution-program-edit-item input:not([type="checkbox"]),.institution-program-edit-item select,.institution-program-edit-item textarea{width:100%;min-width:0;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:var(--paper);font:inherit;font-size:13px}
+.institution-program-edit-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--gold-deep)}
+.institution-program-delete{display:flex!important;grid-template-columns:auto 1fr;align-items:center;gap:8px!important;padding-top:8px!important;border-top:1px solid var(--line)}
+.institution-program-editor-form .button{justify-self:start}
+.institution-program-editor-form .errorlist{margin:0;padding-left:18px;color:#a63f36;font-size:12px}
+.theme-dark .institution-program-edit-item input:not([type="checkbox"]),.theme-dark .institution-program-edit-item select,.theme-dark .institution-program-edit-item textarea{color:var(--ink);background:#172f38}
+.theme-dark .institution-program-editor-form .errorlist{color:#ffaaa2}
+@media(max-width:540px){.institution-program-editor>summary{width:100%;white-space:normal}.institution-program-edit-item{padding:14px}.institution-program-editor-form .button{width:100%;white-space:normal}}
+@media(prefers-reduced-motion:reduce){.institution-program-editor>summary{transition:none}}

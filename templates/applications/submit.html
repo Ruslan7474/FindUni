@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Заявка — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/application-documents.css' %}?v=1">{% endblock %}
+{% block content %}<section class="form-card application-form-card"><h1>Подать заявку</h1><form method="post" enctype="multipart/form-data" class="application-submit-form" data-requirements-url="{% url 'program-document-requirements-json' 0 %}">{% csrf_token %}{{ form.as_p }}
+	<section class="application-documents" id="application-documents" aria-labelledby="application-documents-title" data-program-id="{{ selected_program.pk|default:'' }}">
+		<h2 id="application-documents-title">Документы к заявлению</h2>
+		<p class="application-documents-note">Для каждого документа соблюдайте указанный формат. Максимальный размер файла — {{ max_document_size_mb }} МБ.</p>
+		<div class="application-document-fields" data-document-fields>
+			{% for field in document_fields %}{% with requirement=field.requirement %}<div class="application-document-field"><label for="document-{{ requirement.pk }}">{{ requirement.name }}{% if requirement.is_required %} <span>Обязательно</span>{% else %} <span>Необязательно</span>{% endif %}</label><input id="document-{{ requirement.pk }}" type="file" name="document_{{ requirement.pk }}" accept="{% if requirement.file_format == 'jpg' %}.jpg,.jpeg{% else %}.{{ requirement.file_format }}{% endif %}"{% if requirement.is_required %} required{% endif %}><small>Формат: {{ requirement.get_file_format_display }}</small>{% if field.error %}<p class="errorlist">{{ field.error }}</p>{% endif %}</div>{% endwith %}{% empty %}<p class="application-documents-empty">Выберите программу, чтобы увидеть список документов.</p>{% endfor %}
+		</div>
+	</section>
+	<button class="button" type="submit">Отправить заявление</button>
+</form></section><script src="{% static 'js/application-documents.js' %}?v=1" defer></script>{% endblock %}

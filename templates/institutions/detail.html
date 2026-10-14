@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ institution.name|default:'Профиль учебного заведения' }} — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/institution-programs.css' %}?v=1">{% endblock %}
+{% block content %}
+<section class="profile-page institution-profile-page">
+  {% if is_owner and not institution.approved %}<div class="institution-status-banner"><strong>Страница не опубликована</strong><span>После заполнения профиль будет отправлен на модерацию. В публичный каталог попадают только одобренные заведения.</span></div>{% endif %}
+
+  <header class="institution-profile-hero">
+    <div class="institution-brand-art">
+      {% if institution.logo %}<img src="{{ institution.logo.url }}" alt="Логотип {{ institution.name }}">{% else %}<svg class="icon" aria-hidden="true"><use href="#icon-building"/></svg>{% endif %}
+    </div>
+    <div class="institution-profile-intro">
+      <div class="institution-profile-meta">{% if institution.get_institution_type_display %}<span class="institution-type-badge">{{ institution.get_institution_type_display }}</span>{% endif %}{% if institution.rating_count %}<span class="institution-rating"><svg class="icon" aria-hidden="true"><use href="#icon-star"/></svg>{{ institution.rating|floatformat:1 }} · {{ institution.rating_count }} отзывов</span>{% endif %}</div>
+      <h1>{{ institution.name|default:'Название учебного заведения' }}</h1>
+      {% if institution.city or institution.address %}<p class="profile-location"><svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>{% if institution.city %}{{ institution.city }}{% endif %}{% if institution.city and institution.address %}, {% endif %}{{ institution.address }}</p>{% endif %}
+      {% if institution.description %}<p class="institution-description">{{ institution.description }}</p>{% elif is_owner %}<p class="institution-description profile-muted">Добавьте описание учебного заведения, чтобы представить его абитуриентам.</p>{% endif %}
+      {% for message in messages %}<p class="profile-save-notice" role="status">{{ message }}</p>{% endfor %}
+      <div class="institution-profile-actions">
+        {% if is_owner %}<a class="button" href="{% url 'dashboard' %}">Перейти в кабинет</a>
+        {% elif user.is_authenticated and user.role == 'student' %}<a class="button" href="{% url 'submit-application' %}">Подать заявление</a>{% endif %}
+        {% if user.is_authenticated and user.role == 'student' %}<a class="button button-outline" href="{% url 'add-review' institution.pk %}">Оставить отзыв</a>{% endif %}
+        {% if user.is_authenticated and user.role == 'student' %}<form method="post" action="{% url 'toggle-institution-follow' institution.pk %}">{% csrf_token %}<button class="button button-outline" type="submit">{% if is_following %}Отписаться от заведения{% else %}Подписаться на заведение{% endif %}</button></form>{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="institution-profile-grid">
+    <section class="profile-panel" aria-labelledby="programs-title">
+      <div class="profile-panel-heading"><div><p class="section-kicker">Обучение</p><h2 id="programs-title">Программы</h2></div>{% if programs %}<span class="profile-count">{{ programs|length }}</span>{% endif %}</div>
+      {% if is_owner %}
+        <details class="institution-program-editor" id="institution-program-editor" {% if program_formset.errors %}open{% endif %}>
+          <summary class="button">Добавить направление / программу</summary>
+          <form method="post" action="{% url 'institution-profile' %}" class="institution-program-editor-form">
+            {% csrf_token %}
+            {{ program_formset.management_form }}
+            {{ program_formset.non_form_errors }}
+            {% for program_form in program_formset %}
+              <fieldset class="institution-program-edit-item">
+                <legend>{% if program_form.instance.pk %}Редактирование программы {{ forloop.counter }}{% else %}Новая программа{% endif %}</legend>
+                {{ program_form.id }}
+                {{ program_form.as_p }}
+                {% if program_formset.can_delete %}<p class="institution-program-delete">{{ program_form.DELETE }} <label for="{{ program_form.DELETE.id_for_label }}">Удалить программу</label></p>{% endif %}
+              </fieldset>
+            {% endfor %}
+            <button class="button" type="submit">Сохранить программы</button>
+          </form>
+        </details>
+      {% endif %}
+      {% for program in programs %}
+        <article class="institution-program">
+          <div class="institution-program-heading"><h3>{{ program.name }}</h3><span class="institution-program-price">{% if program.price %}{{ program.price }}{% else %}Стоимость не указана{% endif %}</span></div>
+          {% if program.direction %}<p class="institution-program-direction">Направление: {{ program.direction }}</p>{% endif %}
+          <div class="institution-program-meta">{% if program.form %}<span>{{ program.form }}</span>{% endif %}{% if program.duration %}<span>{{ program.duration }}</span>{% endif %}{% if program.language %}<span>{{ program.language }}</span>{% endif %}{% if program.places %}<span>Мест: {{ program.places }}</span>{% endif %}{% if program.grant_places %}<span>Грантовых мест: {{ program.grant_places }}</span>{% endif %}{% if not program.form and not program.duration and not program.language and not program.places and not program.grant_places %}<span>Дополнительная информация пока не заполнена.</span>{% endif %}</div>
+          {% if is_owner %}<a class="institution-program-documents-link" href="{% url 'program-document-requirements' program.pk %}">Настроить документы для заявления</a>{% endif %}
+        </article>
+      {% empty %}<p class="profile-empty-state">Учебные программы пока не добавлены.</p>{% endfor %}
+    </section>
+
+    <aside class="profile-side-column">
+      <section class="profile-panel"><p class="section-kicker">Связь</p><h2>Контакты и адрес</h2><dl class="profile-facts">{% if institution.city %}<div><dt>Город</dt><dd>{{ institution.city }}</dd></div>{% endif %}{% if institution.address %}<div><dt>Адрес</dt><dd>{{ institution.address }}</dd></div>{% endif %}{% if institution.email %}<div><dt>Email</dt><dd><a href="mailto:{{ institution.email }}">{{ institution.email }}</a></dd></div>{% endif %}{% if institution.phone %}<div><dt>Телефон</dt><dd><a href="tel:{{ institution.phone }}">{{ institution.phone }}</a></dd></div>{% endif %}{% if institution.website %}<div><dt>Сайт</dt><dd><a href="{{ institution.website }}" target="_blank" rel="noopener noreferrer">{{ institution.website }}</a></dd></div>{% endif %}{% if not institution.city and not institution.address and not institution.email and not institution.phone and not institution.website %}<p class="profile-empty-state">Контактные данные пока не указаны.</p>{% endif %}</dl></section>
+      {% if is_owner %}<section class="institution-owner-panel"><svg class="icon" aria-hidden="true"><use href="#icon-building"/></svg><h2>Управление страницей</h2><p>Изменения профиля доступны только владельцу этого учебного заведения.</p><a href="{% url 'dashboard' %}">Редактировать в кабинете</a></section>{% endif %}
+    </aside>
+  </div>
+
+  <section class="profile-panel institution-reviews-panel" aria-labelledby="reviews-title">
+    <div class="profile-panel-heading"><div><p class="section-kicker">Опыт абитуриентов</p><h2 id="reviews-title">Отзывы</h2></div><span class="profile-count">{{ reviews|length }}</span></div>
+    {% for review in reviews %}<article class="profile-comment"><div class="profile-comment-heading"><strong>{{ review.author.get_full_name|default:review.author.get_role_display }}</strong><span class="review-score">{{ review.rating }}/5</span></div><p>{{ review.text }}</p><time datetime="{{ review.created_at|date:'c' }}">{{ review.created_at|date:'j E Y' }}</time></article>{% empty %}<p class="profile-empty-state">Отзывов пока нет.</p>{% endfor %}
+  </section>
+</section>
+{% endblock %}

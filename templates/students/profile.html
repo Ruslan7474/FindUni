@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ display_name|default:'Профиль абитуриента' }} — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/profile-comments.css' %}?v=1"><link rel="stylesheet" href="{% static 'css/student-grades.css' %}?v=1">{% endblock %}
+{% block content %}
+<section class="profile-page student-profile-page">
+	<header class="student-profile-hero">
+		<div class="profile-avatar profile-avatar-large">
+			{% if profile.avatar %}<img src="{{ profile.avatar.url }}" alt="Фото профиля {{ display_name }}">{% else %}<span aria-hidden="true">{{ display_name|default:'А'|first|upper }}</span>{% endif %}
+		</div>
+		<div class="student-profile-intro">
+			<div class="profile-title-line"><h1>{{ display_name|default:'Профиль абитуриента' }}</h1><span class="profile-role-badge">Абитуриент</span></div>
+			{% if profile.bio %}<p class="profile-summary">{{ profile.bio }}</p>{% else %}<p class="profile-summary profile-muted">Добавьте информацию о себе, чтобы учебным заведениям было проще познакомиться с вами.</p>{% endif %}
+			{% if profile.city %}<p class="profile-location"><svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>{{ profile.city }}</p>{% endif %}
+			{% if profile.interests or profile.languages %}<div class="profile-tags">{% if profile.interests %}<span>{{ profile.interests }}</span>{% endif %}{% if profile.languages %}<span>Языки: {{ profile.languages }}</span>{% endif %}</div>{% endif %}
+		</div>
+		<div class="student-profile-actions"><a class="button profile-edit-button" href="{% url 'dashboard' %}">Редактировать профиль</a><a class="button profile-preview-button" href="{% url 'student-detail' profile.pk %}?view=guest">Посмотреть как гость</a></div>
+	</header>
+	{% include 'students/_grade_wheels.html' with show_grade_editor_link=False %}
+	{% for message in messages %}<p class="profile-save-notice" role="status">{{ message }}</p>{% endfor %}
+	<section class="profile-completion-panel" aria-label="Заполненность профиля"><div><strong>Профиль заполнен на {{ profile_completion }}%</strong><span>Добавьте информацию, чтобы представить себя учебным заведениям.</span></div><progress max="100" value="{{ profile_completion }}">{{ profile_completion }}%</progress></section>
+
+	<div class="profile-content-grid">
+		<div class="profile-main-column">
+			<section class="profile-panel" aria-labelledby="applications-title">
+				<div class="profile-panel-heading"><div><p class="section-kicker">Поступление</p><h2 id="applications-title">Мои заявления</h2></div><span class="profile-count">{{ applications|length }}</span></div>
+				{% for application in applications %}<article class="profile-application"><div><h3>{{ application.institution.name }}</h3><p>{{ application.program.name }} · {{ application.created_at|date:'j E Y' }}</p>{% if application.rejection_reason %}<p class="profile-item-description">Причина отказа: {{ application.rejection_reason }}</p>{% endif %}</div><span class="application-status status-{{ application.status }}">{{ application.get_status_display }}</span></article>{% empty %}<div class="profile-empty-state"><p>Вы пока не отправляли заявления.</p><a class="profile-inline-link" href="{% url 'institution-list' %}">Найти учебное заведение</a></div>{% endfor %}
+				<a class="profile-section-link" href="{% url 'application-dashboard' %}">Все заявления</a>
+			</section>
+
+			<section class="profile-panel" aria-labelledby="education-title">
+				<div class="profile-panel-heading"><div><p class="section-kicker">Образование</p><h2 id="education-title">Где я учился</h2></div><span class="profile-count">{{ education|length }}</span></div>
+				{% for entry in education %}<article class="profile-list-item"><span class="profile-list-icon"><svg class="icon" aria-hidden="true"><use href="#icon-book"/></svg></span><div><h3>{{ entry.institution_name }}</h3><p>{{ entry.get_level_display }}{% if entry.start_year %} · {{ entry.start_year }}{% endif %}{% if entry.end_year %}–{{ entry.end_year }}{% endif %}</p>{% if entry.specialty %}<p class="profile-item-description">{{ entry.specialty }}</p>{% endif %}</div></article>{% empty %}<p class="profile-empty-state">Образование пока не добавлено.</p>{% endfor %}
+				<details class="profile-add-panel" {% if open_form == 'education' %}open{% endif %}><summary>+ Добавить образование</summary><form method="post" class="profile-entry-form">{% csrf_token %}<input type="hidden" name="profile_action" value="education">{{ education_form.as_p }}<button class="button" type="submit">Сохранить образование</button></form></details>
+			</section>
+
+			<section class="profile-panel" aria-labelledby="scores-title">
+				<div class="profile-panel-heading"><div><p class="section-kicker">Мои результаты</p><h2 id="scores-title">Тесты и экзамены</h2></div><span class="profile-count">{{ test_scores|length }}</span></div>
+				{% if test_scores %}<div class="profile-score-grid">{% for score in test_scores %}<article class="profile-score-item"><p>{{ score.test_type }}</p><strong>{{ score.score }}</strong><time datetime="{{ score.date|date:'Y-m-d' }}">{{ score.date|date:'j E Y' }}</time></article>{% endfor %}</div>{% else %}<p class="profile-empty-state">Результаты тестов пока не добавлены.</p>{% endif %}
+				<details class="profile-add-panel" {% if open_form == 'test_score' %}open{% endif %}><summary>+ Добавить тест или экзамен</summary><form method="post" class="profile-entry-form">{% csrf_token %}<input type="hidden" name="profile_action" value="test_score">{{ test_score_form.as_p }}<button class="button" type="submit">Сохранить результат</button></form></details>
+			</section>
+
+			<section class="profile-panel" aria-labelledby="grades-title">
+				<div class="profile-panel-heading"><div><p class="section-kicker">Школьная успеваемость</p><h2 id="grades-title">Оценки и аттестат</h2></div><span class="profile-count">{{ grades|length }}</span></div>
+				{% for grade in grades %}<article class="profile-grade-item"><span>{{ grade.subject }}</span><strong>{{ grade.grade }}</strong></article>{% empty %}<p class="profile-empty-state">Оценки пока не добавлены.</p>{% endfor %}
+				<details class="profile-add-panel" {% if open_form == 'grade' %}open{% endif %}><summary>+ Добавить оценку</summary><form method="post" class="profile-entry-form">{% csrf_token %}<input type="hidden" name="profile_action" value="grade">{{ grade_form.as_p }}<button class="button" type="submit">Сохранить оценку</button></form></details>
+			</section>
+
+			<section class="profile-panel" aria-labelledby="comments-title">
+				<div class="profile-panel-heading"><div><p class="section-kicker">Общение</p><h2 id="comments-title">Комментарии к профилю</h2></div><span class="profile-count">{{ comments|length }}</span></div>
+				{% for comment in comments %}{% include 'students/_comment_item.html' with is_reply=False %}{% empty %}<p class="profile-empty-state">Комментариев пока нет.</p>{% endfor %}
+			</section>
+		</div>
+
+		<aside class="profile-side-column">
+			<section class="profile-panel"><p class="section-kicker">Профиль</p><h2>Основная информация</h2><dl class="profile-facts"><div><dt>Город</dt><dd>{{ profile.city|default:'Не указан' }}</dd></div><div><dt>Дата рождения</dt><dd>{{ profile.date_of_birth|date:'j E Y'|default:'Не указана' }}</dd></div><div><dt>Национальность</dt><dd>{{ profile.nationality|default:'Не указана' }}</dd></div><div><dt>Гражданство</dt><dd>{{ profile.citizenship|default:'Не указано' }}</dd></div><div><dt>Электронная почта</dt><dd>{{ user.email|default:'Не указана' }}</dd></div><div><dt>Интересующие направления</dt><dd>{{ profile.interests|default:'Не указаны' }}</dd></div><div><dt>Языки</dt><dd>{{ profile.languages|default:'Не указаны' }}</dd></div></dl></section>
+			<section class="profile-privacy-panel"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg><h2>Приватность</h2><p>В каталоге абитуриентов публично видны имя, фото, город, интересующие направления и образование. Дата рождения, национальность, гражданство, описание, языки, оценки, результаты и контакты скрыты от гостей. Полные данные доступны связанному с заявлением учебному заведению.</p><a href="{% url 'student-detail' profile.pk %}?view=guest">Посмотреть как гость</a></section>
+			<section class="profile-panel" aria-labelledby="friends-title"><div class="profile-panel-heading"><div><p class="section-kicker">Сообщество</p><h2 id="friends-title">Друзья</h2></div><span class="profile-count">{{ friends|length }}</span></div>
+				{% for friend in friends %}<article class="profile-social-item"><span class="profile-social-avatar">{% if friend.profile and friend.profile.avatar %}<img src="{{ friend.profile.avatar.url }}" alt="">{% else %}{{ friend.profile.full_name|default:friend.user.get_full_name|default:'А'|first|upper }}{% endif %}</span><a href="{% if friend.profile %}{% url 'student-detail' friend.profile.pk %}{% else %}{% url 'student-list' %}{% endif %}">{{ friend.profile.full_name|default:friend.user.get_full_name|default:'Абитуриент' }}</a></article>{% empty %}<p class="profile-empty-state">Друзей пока нет.</p>{% endfor %}
+				{% if incoming_friend_requests %}<h3 class="profile-subheading">Входящие запросы</h3>{% for friend in incoming_friend_requests %}<article class="profile-social-request"><span>{{ friend.profile.full_name|default:friend.user.get_full_name|default:'Абитуриент' }}</span><form method="post" action="{% url 'manage-friend' friend.user.pk %}">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="button button-small" type="submit">Принять</button></form></article>{% endfor %}{% endif %}
+				{% if outgoing_friend_requests %}<h3 class="profile-subheading">Ожидают ответа</h3>{% for friend in outgoing_friend_requests %}<article class="profile-social-request"><span>{{ friend.profile.full_name|default:friend.user.get_full_name|default:'Абитуриент' }}</span><span class="profile-pending-label">Запрос отправлен</span></article>{% endfor %}{% endif %}
+				<a class="profile-section-link" href="{% url 'student-list' %}">Найти абитуриентов</a>
+			</section>
+			<section class="profile-panel" aria-labelledby="followed-institutions-title"><div class="profile-panel-heading"><div><p class="section-kicker">Поступление</p><h2 id="followed-institutions-title">Вузы в подписках</h2></div><span class="profile-count">{{ followed_institutions|length }}</span></div>
+				{% for follow in followed_institutions %}<article class="profile-followed-institution"><a href="{% url 'institution-detail' follow.institution.pk %}">{{ follow.institution.name }}</a><span>{% if follow.institution.city %}{{ follow.institution.city }}{% else %}Город не указан{% endif %}</span></article>{% empty %}<p class="profile-empty-state">Вы пока не подписаны на учебные заведения.</p>{% endfor %}
+				<a class="profile-section-link" href="{% url 'institution-list' %}">Найти вузы и колледжи</a>
+			</section>
+		</aside>
+	</div>
+</section>
+{% endblock %}

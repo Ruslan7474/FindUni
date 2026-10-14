@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}FindUni — найди своё учебное место{% endblock %}
+{% block content %}
+<div class="home-page">
+    <section class="hero-section"><div class="hero-inner">
+        <div class="hero-copy">
+            <div class="hero-kicker"><span></span>Твой путь к образованию</div>
+            <h1>Найди место, где начнётся <span class="underlined">твоё будущее</span></h1>
+            <p class="hero-description">Сравнивай университеты и колледжи разных стран, изучай программы и условия поступления — не переключаясь между десятками сайтов.</p>
+            <form class="search-panel" method="get" action="{% url 'home' %}">
+                <label class="search-field"><svg class="icon"><use href="#icon-search"/></svg><span class="visually-hidden">Название учебного заведения</span><input name="q" type="search" placeholder="Название вуза или колледжа" value="{{ query }}"></label>
+                <span class="search-divider"></span>
+                <div class="city-picker custom-picker">
+                    <input type="hidden" name="city" value="{{ selected_city }}">
+                    <button class="picker-trigger" type="button" aria-expanded="false"><svg class="icon"><use href="#icon-pin"/></svg><span>{{ selected_city }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+                    <div class="picker-menu" role="listbox" aria-label="Выберите город">
+                        <button class="picker-option" type="button" data-value="Все города">Все города</button>
+                        {% for city in cities %}<button class="picker-option" type="button" data-value="{{ city }}">{{ city }}</button>{% endfor %}
+                    </div>
+                </div>
+                <button class="button search-button" type="submit">Найти</button>
+            </form>
+        </div>
+        <div class="hero-visual"><div class="hero-ring"></div><div class="hero-dots" aria-hidden="true">{% for dot in '1234567890123456' %}<span></span>{% endfor %}</div>
+            <div class="hero-image-wrap"><img src="https://images.unsplash.com/photo-1576495199011-eb94736d05d6?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaXZlcnNlJTIwdW5pdmVyc2l0eSUyMHN0dWRlbnRzJTIwbW9kZXJuJTIwZWR1Y2F0aW9ufGVufDF8fHx8MTc5MTYyMjMzMHww&amp;ixlib=rb-4.1.0&amp;q=80&amp;w=1080" alt="Студенты на территории современного университетского кампуса"></div>
+        </div>
+    </div></section>
+
+    <section class="content-section category-section" id="catalog">
+        <div class="section-heading"><div><p class="section-kicker">Начни с главного</p><h2 class="section-title">Что ты ищешь?</h2></div><a class="arrow-link" href="{% url 'institution-list' %}">Весь каталог <svg class="icon"><use href="#icon-arrow"/></svg></a></div>
+        <div class="category-grid">
+            <a class="category-card" href="{% url 'institution-list' %}?type=university"><span class="category-icon"><svg class="icon"><use href="#icon-building"/></svg></span><span class="category-arrow"><svg class="icon"><use href="#icon-arrow"/></svg></span><strong>Университеты</strong><span class="category-description">Высшее образование: бакалавриат, магистратура и международные программы</span></a>
+            <a class="category-card" href="{% url 'institution-list' %}?type=college9"><span class="category-icon"><svg class="icon"><use href="#icon-book"/></svg></span><span class="category-arrow"><svg class="icon"><use href="#icon-arrow"/></svg></span><strong>Колледжи после 9 класса</strong><span class="category-description">Профессия и практические навыки за короткий срок</span></a>
+            <a class="category-card" href="{% url 'institution-list' %}?type=college11"><span class="category-icon"><svg class="icon"><use href="#icon-users"/></svg></span><span class="category-arrow"><svg class="icon"><use href="#icon-arrow"/></svg></span><strong>Колледжи после 11 класса</strong><span class="category-description">Среднее профессиональное образование и новые возможности</span></a>
+        </div>
+    </section>
+
+    <section class="popular-section" id="popular"><div class="content-section popular-inner">
+        <div class="section-heading"><div><p class="section-kicker">Выбор абитуриентов</p><h2 class="section-title">Популярные заведения</h2>{% if search_performed %}<p class="search-result">{% if result_count %}Найдено заведений: {{ result_count }}{% else %}По вашему запросу ничего не найдено{% endif %}</p>{% endif %}</div><a class="arrow-link" href="{% url 'institution-list' %}">Смотреть все <svg class="icon"><use href="#icon-arrow"/></svg></a></div>
+        {% if featured_institutions %}<div class="institution-grid">
+            {% for institution in featured_institutions %}<article class="institution-card">
+                <div class="institution-art tone-{{ institution.tone }}">{% if institution.photo %}<img class="institution-photo" src="{{ institution.photo }}" alt="Фотография {{ institution.name }}" loading="lazy">{% else %}<span class="art-ring"></span><span class="art-circle"></span><span class="institution-mark">{{ institution.mark }}</span>{% endif %}<button class="favorite-button" type="button" aria-label="Добавить в избранное" aria-pressed="false" data-favorite="{{ institution.name }}"><svg class="icon"><use href="#icon-heart"/></svg></button><span class="institution-type">{{ institution.type }}</span></div>
+                <div class="institution-info"><div class="institution-meta"><span class="institution-city"><svg class="icon"><use href="#icon-pin"/></svg>{{ institution.city }}</span><span class="institution-rating"><svg class="icon"><use href="#icon-star"/></svg>{% if institution.rating is not None %}{{ institution.rating|floatformat:1 }} <span>({{ institution.reviews }})</span>{% else %}Нет оценок{% endif %}</span></div><h3><a href="{{ institution.url }}">{{ institution.name }}</a></h3><div class="institution-bottom"><div><span>{{ institution.directions }} направлений</span><strong>{{ institution.price }}</strong></div><a class="card-arrow" href="{{ institution.url }}" aria-label="Подробнее: {{ institution.name }}"><svg class="icon"><use href="#icon-arrow"/></svg></a></div></div>
+            </article>{% endfor %}
+        </div>{% else %}<div class="empty-state"><strong>{% if search_performed %}Ничего не найдено{% else %}Каталог скоро появится{% endif %}</strong><p>{% if search_performed %}Попробуйте изменить название или выбрать другой город.{% else %}Здесь появятся учебные заведения, когда они добавят свои профили.{% endif %}</p>{% if search_performed %}<a class="button button-outline" href="{% url 'home' %}#popular">Сбросить поиск</a>{% endif %}</div>{% endif %}
+    </div></section>
+
+    <section class="value-section" id="how">
+        <div class="value-intro">
+            <p class="section-kicker">Всё в одном месте</p>
+            <h2>FindUni помогает сделать уверенный выбор</h2>
+            <p>Не нужно искать информацию на десятках сайтов. Актуальные программы, условия поступления и заявления собраны в одной понятной платформе.</p>
+            <a class="value-link" href="{% url 'institution-list' %}">Перейти в каталог <svg class="icon"><use href="#icon-arrow"/></svg></a>
+        </div>
+        <div class="value-grid">
+            <article class="value-card">
+                <span class="value-icon"><svg class="icon"><use href="#icon-search"/></svg></span>
+                <h3>Удобный поиск и сравнение</h3>
+                <p>Фильтруй заведения по городу, направлению, языку обучения, стоимости и рейтингу.</p>
+            </article>
+            <article class="value-card">
+                <span class="value-icon"><svg class="icon"><use href="#icon-users"/></svg></span>
+                <h3>Один профиль для заявлений</h3>
+                <p>Заполни данные об образовании и результатах тестов один раз — используй их для разных заявок.</p>
+            </article>
+            <article class="value-card">
+                <span class="value-icon"><svg class="icon"><use href="#icon-check"/></svg></span>
+                <h3>Статусы без неопределённости</h3>
+                <p>Следи за каждым заявлением: отправлено, на рассмотрении, нужны документы или принято.</p>
+            </article>
+            <article class="value-card">
+                <span class="value-icon"><svg class="icon"><use href="#icon-eye"/></svg></span>
+                <h3>Данные под защитой</h3>
+                <p>Оценки, результаты тестов и контакты увидит только заведение, в которое подано заявление.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="audience-section" id="students">
+        <div class="audience-column audience-students">
+            <p class="audience-kicker">Для абитуриентов</p>
+            <h2>Выбирай, сравнивай, поступай</h2>
+            <p>Изучи страницы заведений, сохрани избранное и подай заявление на подходящее направление.</p>
+            <a class="button audience-button audience-button-primary" href="{% url 'institution-list' %}">Найти заведение <svg class="icon"><use href="#icon-arrow"/></svg></a>
+        </div>
+        <div class="audience-column audience-institutions">
+            <p class="audience-kicker">Для учебных заведений</p>
+            <h2>Находите абитуриентов</h2>
+            <p>Расскажите о программах и условиях поступления, получайте заявления и управляйте их статусами в личном кабинете.</p>
+            <a class="button audience-button audience-button-primary" href="{% url 'register' %}?role=institution">Добавить заведение <svg class="icon"><use href="#icon-arrow"/></svg></a>
+        </div>
+    </section>
+</div>
+{% endblock %}

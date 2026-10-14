@@ -1,0 +1,133 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="FindUni — платформа для поиска университетов и колледжей по всему миру">
+    <title>{% block title %}FindUni{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=27">
+    <link rel="stylesheet" href="{% static 'css/profile-social.css' %}?v=1">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% if request.COOKIES.theme == 'dark' %}theme-dark{% endif %}{% if request.COOKIES.large_text == '1' %} large-text{% endif %}">
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></symbol>
+        <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+        <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+        <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+        <symbol id="icon-building" viewBox="0 0 24 24"><path d="M3 21h18M6 21V9l6-4 6 4v12M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></symbol>
+        <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+        <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2L5.8 21 7 14.2l-5-4.9 6.9-1Z"/></symbol>
+        <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    </svg>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{% url 'home' %}" aria-label="FindUni — главная">
+                <span class="brand-mark"><svg class="icon"><use href="#icon-book"/></svg></span>
+                <span>Find<span class="brand-accent">Uni</span></span>
+            </a>
+            <nav class="primary-nav" aria-label="Основная навигация">
+                <a href="{% url 'home' %}">Главная</a>
+                <a href="{% url 'institution-list' %}">Вузы и колледжи</a>
+                <a href="{% url 'student-list' %}">Абитуриенты</a>
+                <a href="{% url 'how-to-apply' %}">Как поступить</a>
+                <a href="{% url 'about' %}">О нас</a>
+            </nav>
+            <div class="header-actions">
+                <a class="icon-button accessibility-toggle{% if request.COOKIES.large_text == '1' %} is-active{% endif %}" href="{% url 'large-text-switch' %}?next={{ request.get_full_path|urlencode }}" aria-label="{% if request.COOKIES.large_text == '1' %}Выключить увеличенный текст{% else %}Включить увеличенный текст{% endif %}" title="{% if request.COOKIES.large_text == '1' %}Увеличенный текст включён{% else %}Увеличить текст{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg><span class="accessibility-toggle-label">{% if request.COOKIES.large_text == '1' %}Текст увеличен{% else %}Крупный текст{% endif %}</span></a>
+                <button class="icon-button search-open desktop-search-open" type="button" aria-label="Открыть поиск" title="Поиск"><svg class="icon"><use href="#icon-search"/></svg></button>
+                <a class="icon-button" href="{% if request.COOKIES.theme == 'dark' %}{% url 'theme-switch' 'light' %}{% else %}{% url 'theme-switch' 'dark' %}{% endif %}?next={{ request.get_full_path|urlencode }}" aria-label="Переключить тему"><svg class="icon"><use href="{% if request.COOKIES.theme == 'dark' %}#icon-sun{% else %}#icon-moon{% endif %}"/></svg></a>
+                <details class="language-picker custom-picker">
+                    <summary class="picker-trigger" aria-label="Выбрать язык"><span>{{ request.LANGUAGE_CODE|upper }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></summary>
+                    <div class="picker-menu" aria-label="Язык интерфейса">
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ru' %} is-selected{% endif %}" href="{% url 'language-switch' 'ru' %}">Русский <span>RU</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'en' %} is-selected{% endif %}" href="{% url 'language-switch' 'en' %}">English <span>EN</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ky' %} is-selected{% endif %}" href="{% url 'language-switch' 'ky' %}">Кыргызча <span>KY</span></a>
+                    </div>
+                </details>
+                {% if user.is_authenticated and request.GET.view != 'guest' %}
+                    <a class="login-link" href="{% url 'dashboard' %}">Кабинет</a>
+                    <form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">Выйти</button></form>
+                {% else %}
+                    <a class="login-link" href="{% url 'login' %}">Войти</a>
+                    <a class="button button-small" href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </div>
+            <div class="mobile-header-actions">
+                <button class="icon-button search-open mobile-search-open" type="button" aria-label="Открыть поиск" title="Поиск"><svg class="icon"><use href="#icon-search"/></svg></button>
+                <a class="icon-button mobile-accessibility-open accessibility-toggle{% if request.COOKIES.large_text == '1' %} is-active{% endif %}" href="{% url 'large-text-switch' %}?next={{ request.get_full_path|urlencode }}" aria-label="{% if request.COOKIES.large_text == '1' %}Выключить увеличенный текст{% else %}Включить увеличенный текст{% endif %}" title="{% if request.COOKIES.large_text == '1' %}Увеличенный текст включён{% else %}Увеличить текст{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg>{% if request.COOKIES.large_text == '1' %}<span class="accessibility-active-indicator" aria-hidden="true">✓</span>{% endif %}</a>
+                <button class="icon-button menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-navigation"><svg class="icon"><use href="#icon-menu"/></svg></button>
+            </div>
+        </div>
+        <div class="mobile-navigation" id="mobile-navigation" hidden>
+            <nav aria-label="Мобильная навигация">
+                <a href="{% url 'home' %}">Главная</a>
+                <a href="{% url 'institution-list' %}">Вузы и колледжи</a>
+                <a href="{% url 'student-list' %}">Абитуриенты</a>
+                <a href="{% url 'how-to-apply' %}">Как поступить</a>
+                <a href="{% url 'about' %}">О нас</a>
+            </nav>
+            <div class="mobile-actions">
+                {% if user.is_authenticated and request.GET.view != 'guest' %}<a class="button button-outline" href="{% url 'dashboard' %}">Личный кабинет</a><form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">Выйти</button></form>{% else %}<a class="button button-outline" href="{% url 'login' %}">Войти</a><a class="button" href="{% url 'register' %}">Регистрация</a>{% endif %}
+                <a class="icon-button" href="{% if request.COOKIES.theme == 'dark' %}{% url 'theme-switch' 'light' %}{% else %}{% url 'theme-switch' 'dark' %}{% endif %}?next={{ request.get_full_path|urlencode }}" aria-label="Переключить тему"><svg class="icon"><use href="{% if request.COOKIES.theme == 'dark' %}#icon-sun{% else %}#icon-moon{% endif %}"/></svg></a>
+            </div>
+        </div>
+    </header>
+    <main>{% block content %}{% endblock %}</main>
+    <footer class="site-footer" id="about">
+        <div class="footer-grid">
+            <div class="footer-brand-column">
+                <a class="brand" href="{% url 'home' %}"><span class="brand-mark"><svg class="icon"><use href="#icon-book"/></svg></span><span>Find<span class="brand-accent">Uni</span></span></a>
+                <p>Единая платформа для абитуриентов и учебных заведений по всему миру.</p>
+            </div>
+            <div><h2>Платформа</h2><a href="{% url 'institution-list' %}?type=university">Университеты</a><a href="{% url 'institution-list' %}?type=college9">Колледжи</a><a href="{% url 'student-list' %}">Абитуриенты</a></div>
+            <div><h2>Помощь</h2><a href="{% url 'how-to-apply' %}">Как поступить</a><a href="{% url 'about' %}#faq">Вопросы и ответы</a></div>
+            <div><h2>Информация</h2><a href="{% url 'about' %}">О нас</a></div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 FindUni. Демонстрационный проект.</span><span>Сделано для будущего образования</span></div>
+    </footer>
+    <dialog class="search-dialog" id="site-search" aria-labelledby="search-dialog-title">
+        <div class="search-dialog-shell">
+            <form class="search-dialog-form" id="site-search-form" data-institutions-url="{% url 'institution-list' %}" data-students-url="{% url 'student-list' %}">
+                <svg class="icon search-dialog-leading-icon"><use href="#icon-search"/></svg>
+                <label class="visually-hidden" id="search-dialog-title" for="site-search-input">Что ищем?</label>
+                <input id="site-search-input" name="q" type="search" placeholder="Что ищем?" autocomplete="off">
+                <button class="search-dialog-clear" type="button" aria-label="Очистить запрос" hidden><svg class="icon"><use href="#icon-x"/></svg></button>
+                <button class="search-dialog-close" type="button" aria-label="Закрыть поиск"><svg class="icon"><use href="#icon-x"/></svg></button>
+            </form>
+            <div class="search-dialog-content">
+                <section class="search-panel-section" aria-label="Раздел поиска">
+                    <div class="search-scope-list" role="group" aria-label="Искать в разделе">
+                        <button class="search-scope-chip is-active" type="button" data-search-scope="university" aria-pressed="true">Университет</button>
+                        <button class="search-scope-chip" type="button" data-search-scope="college" aria-pressed="false">Колледж</button>
+                        <button class="search-scope-chip" type="button" data-search-scope="student" aria-pressed="false">Абитуриент</button>
+                    </div>
+                </section>
+                <section class="search-panel-section search-history-section" aria-labelledby="search-history-title">
+                    <div class="search-section-heading"><h2 id="search-history-title">История поиска</h2><button class="search-history-clear" type="button" hidden>Очистить</button></div>
+                    <div class="search-history-list" id="search-history-list" aria-live="polite"></div>
+                    <p class="search-empty-state" id="search-history-empty">Недавние запросы появятся здесь.</p>
+                </section>
+                <section class="search-panel-section" aria-labelledby="popular-search-title">
+                    <h2 id="popular-search-title">Чаще всего ищут</h2>
+                    <p class="search-empty-state">Популярные запросы появятся здесь.</p>
+                </section>
+            </div>
+        </div>
+    </dialog>
+    <script src="{% static 'js/home.js' %}?v=4" defer></script>
+</body>
+</html>
+
+

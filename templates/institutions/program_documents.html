@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Документы программы — FindUni{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/program-documents.css' %}?v=1">{% endblock %}
+{% block content %}
+<section class="program-documents-page">
+    <a class="program-documents-back" href="{% url 'institution-profile' %}">Назад к программам</a>
+    <p class="section-kicker">Документы для поступления</p>
+    <h1>{{ program.name }}</h1>
+    <p class="program-documents-intro">Укажите документы, которые абитуриент должен приложить к заявлению. Для каждого выберите формат файла. Можно добавить до 100 требований.</p>
+
+    <form method="post" class="program-documents-form" id="program-documents-form">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {{ formset.non_form_errors }}
+        <div class="program-document-rows" data-document-rows>
+            {% for requirement_form in formset %}
+                <fieldset class="program-document-row">
+                    <legend>Документ {{ forloop.counter }}</legend>
+                    {{ requirement_form.id }}
+                    {{ requirement_form.as_p }}
+                    {% if formset.can_delete %}<p class="program-document-delete">{{ requirement_form.DELETE }} <label for="{{ requirement_form.DELETE.id_for_label }}">Удалить требование</label></p>{% endif %}
+                </fieldset>
+            {% endfor %}
+        </div>
+        <template id="empty-document-form">{{ formset.empty_form.as_p }}{% if formset.can_delete %}<p class="program-document-delete">{{ formset.empty_form.DELETE }} <label for="{{ formset.empty_form.DELETE.id_for_label }}">Удалить требование</label></p>{% endif %}</template>
+        <div class="program-documents-actions">
+            <button class="button button-outline" type="button" id="add-document-requirement">Добавить документ</button>
+            <button class="button" type="submit">Сохранить требования</button>
+        </div>
+    </form>
+</section>
+<script src="{% static 'js/program-documents.js' %}?v=1" defer></script>
+{% endblock %}

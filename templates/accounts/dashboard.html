@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Кабинет — FindUni{% endblock %}
+{% block content %}
+<section class="profile-page account-dashboard">
+	<header class="dashboard-hero"><div><p class="section-kicker">Личный кабинет</p><h1>{% if student_profile %}{{ student_profile.full_name|default:user.email }}{% elif institution_profile %}{{ institution_profile.name|default:user.email }}{% else %}{{ user.email }}{% endif %}</h1><p>{{ user.get_role_display }} · {{ user.email }}</p></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'home' %}"><button class="button dashboard-logout" type="submit">Выйти</button></form></header>
+	{% for message in messages %}<p class="profile-save-notice" role="status">{{ message }}</p>{% endfor %}
+
+	{% if student_profile %}
+		<div class="dashboard-profile-grid">
+			<section class="profile-panel dashboard-profile-summary"><p class="section-kicker">Профиль абитуриента</p><h2>{{ student_profile.full_name|default:'Заполните имя и фамилию' }}</h2><p>{{ student_profile.city|default:'Город не указан' }}</p><p>{{ student_profile.bio|default:'Добавьте краткую информацию о себе.' }}</p><div class="dashboard-profile-links"><a class="button" href="{% url 'student-profile' %}">Открыть публичный профиль</a><a class="button button-outline" href="{% url 'application-dashboard' %}">Мои заявления</a></div></section>
+			<details class="profile-panel dashboard-edit-panel" {% if student_form.errors %}open{% endif %}><summary>Редактировать профиль</summary><form method="post" enctype="multipart/form-data" class="dashboard-edit-form">{% csrf_token %}<input type="hidden" name="profile_type" value="student">{{ student_form.as_p }}<button class="button" type="submit">Сохранить изменения</button></form></details>
+		</div>
+	{% endif %}
+
+	{% if institution_profile %}
+		<div class="dashboard-profile-grid">
+			<section class="profile-panel dashboard-profile-summary"><p class="section-kicker">Профиль учебного заведения</p><h2>{{ institution_profile.name|default:'Название не заполнено' }}</h2><p>{% if institution_profile.city %}{{ institution_profile.city }}{% else %}Город не указан{% endif %}{% if institution_profile.get_institution_type_display %} · {{ institution_profile.get_institution_type_display }}{% endif %}</p><p>{% if institution_profile.approved %}Страница опубликована{% else %}Страница ожидает проверки и пока не видна в каталоге{% endif %}</p><div class="dashboard-profile-links"><a class="button" href="{% url 'institution-profile' %}">Открыть страницу</a><a class="button button-outline" href="{% url 'application-dashboard' %}">Заявления</a></div></section>
+			<details class="profile-panel dashboard-edit-panel" {% if institution_form.errors or photo_formset.errors %}open{% endif %}><summary>Редактировать профиль</summary><form method="post" enctype="multipart/form-data" class="dashboard-edit-form">{% csrf_token %}<input type="hidden" name="profile_type" value="institution"><h3>Данные заведения</h3>{{ institution_form.as_p }}<h3>Фотографии заведения</h3><p class="profile-muted">Загрузите фотографию для карточки и страницы заведения.</p>{{ photo_formset.management_form }}{% for photo_form in photo_formset %}<fieldset class="dashboard-inline-form"><legend>Фотография {{ forloop.counter }}</legend>{{ photo_form.id }}{{ photo_form.as_p }}{% if photo_formset.can_delete %}<p>{{ photo_form.DELETE }} <label for="{{ photo_form.DELETE.id_for_label }}">Удалить фотографию</label></p>{% endif %}</fieldset>{% endfor %}<button class="button" type="submit">Сохранить изменения</button></form></details>
+		</div>
+	{% endif %}
+</section>
+{% endblock %}

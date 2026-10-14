@@ -1,0 +1,19 @@
+.program-documents-page{width:min(820px,100%);padding:44px 28px 64px!important;margin:0 auto}
+.program-documents-back{display:inline-flex;margin-bottom:22px;color:var(--muted);font-size:12px;font-weight:700}
+.program-documents-back:hover{color:var(--gold-deep)}
+.program-documents-page h1{margin:0;font-size:30px;line-height:1.25;overflow-wrap:anywhere}
+.program-documents-intro{max-width:680px;margin:12px 0 24px;color:var(--muted);font-size:13px;line-height:1.7}
+.program-documents-form{display:grid;gap:14px}
+.program-document-rows{display:grid;gap:12px}
+.program-document-row{display:grid;gap:11px;min-width:0;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--white)}
+.program-document-row legend{padding:0 6px;font-size:12px;font-weight:800}
+.program-document-row>p{display:grid;gap:6px;margin:0}
+.program-document-row label{font-size:12px;font-weight:700}
+.program-document-row input:not([type="checkbox"]),.program-document-row select{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:var(--paper);font:inherit;font-size:13px}
+.program-document-row input[type="checkbox"]{width:18px;height:18px;accent-color:var(--gold-deep)}
+.program-document-delete{display:flex!important;align-items:center;gap:8px!important;padding-top:9px!important;border-top:1px solid var(--line)}
+.program-documents-actions{display:flex;flex-wrap:wrap;gap:10px}
+.program-documents-actions .button-outline{border:1px solid var(--line);color:var(--ink);background:transparent}
+.theme-dark .program-document-row{background:var(--white)}
+.theme-dark .program-document-row input:not([type="checkbox"]),.theme-dark .program-document-row select{color:var(--ink);background:#172f38}
+@media(max-width:540px){.program-documents-page{padding:30px 20px 48px!important}.program-documents-page h1{font-size:25px}.program-document-row{padding:15px}.program-documents-actions{display:grid;grid-template-columns:1fr}.program-documents-actions .button{width:100%;white-space:normal}}

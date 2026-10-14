@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Оставить отзыв — FindUni{% endblock %}
+{% block content %}
+<section class="form-card">
+  <h1>Оставить отзыв</h1>
+  <p>{{ institution.name }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Отправить</button>
+  </form>
+</section>
+{% endblock %}
