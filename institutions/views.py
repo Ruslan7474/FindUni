@@ -7,9 +7,10 @@ from django.db import transaction
 from django.db.models import Min
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from core.models import Notification
 from .forms import InstitutionForm, ProgramDocumentRequirementFormSet, ProgramFormSet, ReviewForm
 from .models import Institution, Program, Review
-from students.models import InstitutionFollow
+from students.models import InstitutionFollow, StudentProfile
 
 
 def institution_list(request):
@@ -70,6 +71,23 @@ def toggle_institution_follow(request, pk):
     institution = get_object_or_404(Institution, pk=pk, approved=True)
     follow, created = InstitutionFollow.objects.get_or_create(student=request.user, institution=institution)
     if created:
+        follower_profile, _ = StudentProfile.objects.get_or_create(
+            user=request.user,
+            defaults={'full_name': request.user.get_full_name()},
+        )
+        follower_name = (
+            follower_profile.full_name if follower_profile.full_name
+            else request.user.get_full_name()
+            or 'Абитуриент'
+        )
+        Notification.objects.create(
+            user=institution.owner,
+            actor=request.user,
+            follow=follow,
+            kind='institution_follow',
+            title='Новая подписка',
+            body=f'{follower_name} подписался на ваше учебное заведение.',
+        )
         messages.success(request, 'Заведение добавлено в подписки.')
     else:
         follow.delete()

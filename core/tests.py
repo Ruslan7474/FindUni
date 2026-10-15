@@ -3,6 +3,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from applications.models import Application
+from core.models import Announcement, Notification
 from institutions.models import Institution, Program
 
 
@@ -80,6 +81,100 @@ class FooterLinkTests(TestCase):
         self.assertNotContains(response, 'Контакты')
         self.assertNotContains(response, 'Конфиденциальность')
         self.assertNotContains(response, 'Условия')
+
+    def test_navigation_mail_button_opens_inbox_and_shows_unread_count(self):
+        user = get_user_model().objects.create_user(username='mail-user', password='test-pass', role='student')
+        self.client.force_login(user)
+
+        empty_inbox = self.client.get(reverse('home'))
+
+        self.assertContains(empty_inbox, 'data-inbox-open')
+        self.assertContains(empty_inbox, 'Сейчас у вас нет почты.')
+        self.assertContains(empty_inbox, 'Удалить всю почту')
+        self.assertNotContains(empty_inbox, 'footer-mail-button')
+
+        notification = Notification.objects.create(user=user, kind='announcement', title='Плановые работы', body='Обновление платформы')
+        populated_inbox = self.client.get(reverse('home'))
+
+        self.assertContains(populated_inbox, 'Плановые работы')
+        self.assertContains(populated_inbox, 'Обновление платформы')
+        self.assertContains(populated_inbox, 'nav-mail-count')
+        self.assertContains(populated_inbox, reverse('notification-mark-read', args=[notification.pk]))
+        self.assertContains(populated_inbox, reverse('notification-delete', args=[notification.pk]))
+
+    def test_individual_inbox_actions_are_scoped_to_the_current_user(self):
+        user = get_user_model().objects.create_user(username='single-mail-owner', password='test-pass', role='student')
+        other_user = get_user_model().objects.create_user(username='single-mail-other', password='test-pass', role='student')
+        own_message = Notification.objects.create(user=user, kind='announcement', title='Своё', body='Своё')
+        other_message = Notification.objects.create(user=other_user, kind='announcement', title='Чужое', body='Чужое')
+        self.client.force_login(user)
+
+        response = self.client.post(reverse('notification-mark-read', args=[other_message.pk]), {'next': '/about/'})
+
+        self.assertRedirects(response, '/about/', fetch_redirect_response=False)
+        own_message.refresh_from_db()
+        other_message.refresh_from_db()
+        self.assertFalse(own_message.is_read)
+        self.assertFalse(other_message.is_read)
+
+        self.client.post(reverse('notification-mark-read', args=[own_message.pk]), {'next': '/about/'})
+        own_message.refresh_from_db()
+        self.assertTrue(own_message.is_read)
+        self.client.post(reverse('notification-delete', args=[other_message.pk]), {'next': '/about/'})
+        self.assertTrue(Notification.objects.filter(pk=other_message.pk, user=other_user).exists())
+        self.client.post(reverse('notification-delete', args=[own_message.pk]), {'next': '/about/'})
+        self.assertFalse(Notification.objects.filter(pk=own_message.pk).exists())
+
+    def test_inbox_actions_only_change_the_current_users_messages(self):
+        user = get_user_model().objects.create_user(username='mail-owner', password='test-pass', role='student')
+        other_user = get_user_model().objects.create_user(username='other-mail-owner', password='test-pass', role='student')
+        own_message = Notification.objects.create(user=user, kind='announcement', title='Моё', body='Моё сообщение')
+        other_message = Notification.objects.create(user=other_user, kind='announcement', title='Чужое', body='Чужое сообщение')
+        self.client.force_login(user)
+
+        response = self.client.post(reverse('inbox-mark-read'), {'next': '/about/?faq=1'})
+
+        self.assertRedirects(response, '/about/?faq=1', fetch_redirect_response=False)
+        own_message.refresh_from_db()
+        other_message.refresh_from_db()
+        self.assertTrue(own_message.is_read)
+        self.assertFalse(other_message.is_read)
+
+        self.client.post(reverse('inbox-delete-all'), {'next': '/about/'})
+
+        self.assertFalse(Notification.objects.filter(user=user).exists())
+        self.assertTrue(Notification.objects.filter(pk=other_message.pk).exists())
+
+    def test_external_inbox_return_url_is_rejected(self):
+        user = get_user_model().objects.create_user(username='safe-mail-user', password='test-pass', role='student')
+        self.client.force_login(user)
+
+        response = self.client.post(reverse('inbox-delete-all'), {'next': 'https://example.com/'})
+
+        self.assertRedirects(response, reverse('home'), fetch_redirect_response=False)
+
+    def test_admin_announcement_is_delivered_to_selected_roles_once(self):
+        admin = get_user_model().objects.create_superuser(
+            username='mail-admin',
+            email='mail-admin@example.com',
+            password='StrongPass123!',
+            role='admin',
+        )
+        student = get_user_model().objects.create_user(username='announcement-student', password='test-pass', role='student')
+        institution_user = get_user_model().objects.create_user(username='announcement-institution', password='test-pass', role='institution')
+        self.client.force_login(admin)
+
+        response = self.client.post(reverse('admin:core_announcement_add'), {
+            'title': 'Технические работы',
+            'body': 'Сервис будет обновлён.',
+            'audience': 'student',
+            '_save': 'Сохранить',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Notification.objects.filter(user=student, kind='announcement', title='Технические работы').exists())
+        self.assertFalse(Notification.objects.filter(user=institution_user).exists())
+        self.assertEqual(Announcement.objects.count(), 1)
 
 
 class HowToApplyTests(TestCase):

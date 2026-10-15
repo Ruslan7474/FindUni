@@ -1,4 +1,8 @@
 from django.contrib import admin
+from django.db import transaction
+from django.utils import timezone
+from accounts.models import User
+from .models import Announcement, Notification
 from django.db import models
 from .models import City, Direction, TestType
 
@@ -65,3 +69,41 @@ class DirectionAdmin(RussianModelAdmin):
 	@admin.display(description='Направление подготовки', ordering='name')
 	def name_label(self, obj):
 		return obj.name
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(RussianModelAdmin):
+	list_display = ('title', 'audience', 'created_at')
+	list_filter = ('audience',)
+	search_fields = ('title', 'body')
+	readonly_fields = ('created_at',)
+	field_labels = {'title': 'Тема', 'body': 'Текст сообщения', 'audience': 'Получатели'}
+
+	def save_model(self, request, obj, form, change):
+		is_new = not change
+		with transaction.atomic():
+			super().save_model(request, obj, form, change)
+			if is_new:
+				users = User.objects.filter(role__in=('student', 'institution'))
+				if obj.audience != 'all':
+					users = users.filter(role=obj.audience)
+				Notification.objects.bulk_create([
+					Notification(
+						user_id=user_id,
+						kind='announcement',
+						title=obj.title,
+						body=obj.body,
+						announcement=obj,
+						created_at=timezone.now(),
+					)
+					for user_id in users.values_list('pk', flat=True).iterator()
+				])
+
+
+@admin.register(Notification)
+class NotificationAdmin(RussianModelAdmin):
+	list_display = ('title', 'user', 'kind', 'is_read', 'created_at')
+	list_filter = ('kind', 'is_read')
+	search_fields = ('title', 'body', 'user__username', 'user__email')
+	readonly_fields = ('created_at',)
+	field_labels = {'user': 'Получатель', 'kind': 'Тип сообщения', 'title': 'Тема', 'body': 'Текст сообщения', 'is_read': 'Прочитано'}

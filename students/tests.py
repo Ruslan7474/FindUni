@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.test import TestCase
 from django.urls import reverse
+from core.models import Notification
 from applications.models import Application
 from institutions.models import Institution, Program
 from students.models import AcademicGrade, Comment, CommentVote, EducationEntry, InstitutionFollow, StudentFriendship, StudentProfile, TestScore
@@ -144,6 +145,9 @@ class StudentCommentInteractionTests(TestCase):
 		self.assertRedirects(response, f'{profile_url}#comments', fetch_redirect_response=False)
 		root = Comment.objects.get(profile=self.profile, text='Первый комментарий')
 		self.assertIsNone(root.parent_id)
+		comment_notice = Notification.objects.get(user=self.profile_owner, kind='comment')
+		self.assertEqual(comment_notice.comment, root)
+		self.assertIn('Первый комментарий', comment_notice.body)
 
 		response = self.client.post(reverse('add-comment', args=[self.profile.pk]), {
 			'text': 'Ответ на комментарий',
@@ -476,13 +480,18 @@ class StudentProfilePrivacyTests(TestCase):
 		self.assertRedirects(response, reverse('student-detail', args=[friend_profile.pk]))
 		request = StudentFriendship.objects.get(from_student=self.student, to_student=friend)
 		self.assertEqual(request.status, 'pending')
-
+		request_notice = Notification.objects.get(user=friend, friendship=request)
+		self.assertEqual(request_notice.actor, self.student)
 		self.client.force_login(friend)
+		self.assertContains(self.client.get(reverse('home')), 'Принять запрос дружбы')
+
 		response = self.client.post(reverse('manage-friend', args=[self.student.pk]), {'action': 'accept'})
 
 		self.assertRedirects(response, reverse('student-detail', args=[self.profile.pk]))
 		request.refresh_from_db()
 		self.assertEqual(request.status, 'accepted')
+		request_notice.refresh_from_db()
+		self.assertTrue(request_notice.is_read)
 		self.assertTrue(StudentFriendship.objects.filter(from_student=friend, to_student=self.student, status='accepted').exists())
 
 	def test_repeated_accept_after_request_was_processed_does_not_return_404(self):

@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=27">
     <link rel="stylesheet" href="{% static 'css/profile-social.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/inbox.css' %}?v=2">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if request.COOKIES.theme == 'dark' %}theme-dark{% endif %}{% if request.COOKIES.large_text == '1' %} large-text{% endif %}">
@@ -23,6 +24,8 @@
         <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
         <symbol id="icon-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
         <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+        <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18m-2 0-.9 14H5.9L5 6m4 0V4h6v2m-5 4v6m4-6v6"/></symbol>
         <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
         <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
         <symbol id="icon-building" viewBox="0 0 24 24"><path d="M3 21h18M6 21V9l6-4 6 4v12M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></symbol>
@@ -47,6 +50,11 @@
             <div class="header-actions">
                 <a class="icon-button accessibility-toggle{% if request.COOKIES.large_text == '1' %} is-active{% endif %}" href="{% url 'large-text-switch' %}?next={{ request.get_full_path|urlencode }}" aria-label="{% if request.COOKIES.large_text == '1' %}Выключить увеличенный текст{% else %}Включить увеличенный текст{% endif %}" title="{% if request.COOKIES.large_text == '1' %}Увеличенный текст включён{% else %}Увеличить текст{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg><span class="accessibility-toggle-label">{% if request.COOKIES.large_text == '1' %}Текст увеличен{% else %}Крупный текст{% endif %}</span></a>
                 <button class="icon-button search-open desktop-search-open" type="button" aria-label="Открыть поиск" title="Поиск"><svg class="icon"><use href="#icon-search"/></svg></button>
+                {% if user.is_authenticated and request.GET.view != 'guest' %}
+                    <button class="icon-button nav-mail-button" type="button" data-inbox-open aria-haspopup="dialog" aria-controls="inbox-dialog" aria-label="Почта{% if inbox_unread_count %}, непрочитанных сообщений: {{ inbox_unread_count }}{% endif %}" title="Почта"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg>{% if inbox_unread_count %}<span class="nav-mail-count" aria-hidden="true">{{ inbox_unread_count }}</span>{% endif %}</button>
+                {% else %}
+                    <a class="icon-button nav-mail-button" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" aria-label="Почта"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg></a>
+                {% endif %}
                 <a class="icon-button" href="{% if request.COOKIES.theme == 'dark' %}{% url 'theme-switch' 'light' %}{% else %}{% url 'theme-switch' 'dark' %}{% endif %}?next={{ request.get_full_path|urlencode }}" aria-label="Переключить тему"><svg class="icon"><use href="{% if request.COOKIES.theme == 'dark' %}#icon-sun{% else %}#icon-moon{% endif %}"/></svg></a>
                 <details class="language-picker custom-picker">
                     <summary class="picker-trigger" aria-label="Выбрать язык"><span>{{ request.LANGUAGE_CODE|upper }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></summary>
@@ -66,6 +74,11 @@
             </div>
             <div class="mobile-header-actions">
                 <button class="icon-button search-open mobile-search-open" type="button" aria-label="Открыть поиск" title="Поиск"><svg class="icon"><use href="#icon-search"/></svg></button>
+                {% if user.is_authenticated and request.GET.view != 'guest' %}
+                    <button class="icon-button nav-mail-button" type="button" data-inbox-open aria-haspopup="dialog" aria-controls="inbox-dialog" aria-label="Почта{% if inbox_unread_count %}, непрочитанных сообщений: {{ inbox_unread_count }}{% endif %}" title="Почта"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg>{% if inbox_unread_count %}<span class="nav-mail-count" aria-hidden="true">{{ inbox_unread_count }}</span>{% endif %}</button>
+                {% else %}
+                    <a class="icon-button nav-mail-button" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" aria-label="Почта"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg></a>
+                {% endif %}
                 <a class="icon-button mobile-accessibility-open accessibility-toggle{% if request.COOKIES.large_text == '1' %} is-active{% endif %}" href="{% url 'large-text-switch' %}?next={{ request.get_full_path|urlencode }}" aria-label="{% if request.COOKIES.large_text == '1' %}Выключить увеличенный текст{% else %}Включить увеличенный текст{% endif %}" title="{% if request.COOKIES.large_text == '1' %}Увеличенный текст включён{% else %}Увеличить текст{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg>{% if request.COOKIES.large_text == '1' %}<span class="accessibility-active-indicator" aria-hidden="true">✓</span>{% endif %}</a>
                 <button class="icon-button menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-navigation"><svg class="icon"><use href="#icon-menu"/></svg></button>
             </div>
@@ -126,8 +139,60 @@
             </div>
         </div>
     </dialog>
-    <script src="{% static 'js/home.js' %}?v=4" defer></script>
+    {% if user.is_authenticated %}
+        <dialog class="inbox-dialog" id="inbox-dialog" aria-labelledby="inbox-dialog-title">
+            <div class="inbox-dialog-shell">
+                <header class="inbox-dialog-header">
+                    <div><p class="section-kicker">Сообщения и уведомления</p><h2 id="inbox-dialog-title">Почта</h2></div>
+                    <button class="icon-button inbox-dialog-close" type="button" aria-label="Закрыть почту"><svg class="icon" aria-hidden="true"><use href="#icon-x"/></svg></button>
+                </header>
+                <div class="inbox-toolbar">
+                    <form method="post" action="{% url 'inbox-delete-all' %}">
+                        {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button class="button button-outline" type="submit" {% if not inbox_notifications %}disabled{% endif %}>Удалить всю почту</button>
+                    </form>
+                    <form method="post" action="{% url 'inbox-mark-read' %}">
+                        {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button class="button button-outline" type="submit" {% if not inbox_unread_count %}disabled{% endif %}>Отметить прочитанным</button>
+                    </form>
+                </div>
+                <div class="inbox-message-list">
+                    {% for notification in inbox_notifications %}
+                        <article class="inbox-message{% if not notification.is_read %} is-unread{% endif %}">
+                            <div class="inbox-message-avatar">
+                                {% if notification.actor.student_profile.avatar %}<img src="{{ notification.actor.student_profile.avatar.url }}" alt="">
+                                {% elif notification.actor.institution_profile.logo %}<img src="{{ notification.actor.institution_profile.logo.url }}" alt="">
+                                {% else %}<span aria-hidden="true">{% if notification.actor %}{{ notification.actor.student_profile.full_name|default:notification.actor.institution_profile.name|default:notification.actor.get_full_name|default:'А'|first|upper }}{% else %}А{% endif %}</span>{% endif %}
+                            </div>
+                            <div class="inbox-message-content">
+                                {% if notification.actor %}
+                                    {% with sender_name=notification.actor.student_profile.full_name|default:notification.actor.institution_profile.name|default:notification.actor.get_full_name|default:notification.actor.get_role_display %}
+                                        <h3>{{ sender_name }}</h3>
+                                    {% endwith %}
+                                {% else %}<h3>Администрация FindUni</h3>{% endif %}
+                                <div class="inbox-message-meta"><span>{{ notification.get_kind_display }}</span><time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|date:'j E Y, H:i' }}</time></div>
+                                <h4 class="inbox-message-subject">{{ notification.title }}</h4>
+                                <p>{{ notification.body }}</p>
+                                {% if notification.application %}<a class="inbox-message-link" href="{% url 'application-detail' notification.application_id %}">Открыть заявление и профиль абитуриента</a>
+                                {% elif notification.comment %}<a class="inbox-message-link" href="{% url 'student-detail' notification.comment.profile_id %}#comment-{{ notification.comment_id }}">Открыть комментарий</a>
+                                {% elif notification.friendship and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">Перейти в профиль</a>
+                                {% elif notification.follow and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">Посмотреть профиль абитуриента</a>{% endif %}
+                                {% if notification.friendship.status == 'pending' and notification.friendship.to_student_id == user.pk %}
+                                    <form class="inbox-accept-form" method="post" action="{% url 'manage-friend' notification.actor_id %}">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="button button-small" type="submit">Принять запрос дружбы</button></form>
+                                {% endif %}
+                            </div>
+                            <div class="inbox-message-actions">
+                                <form method="post" action="{% url 'notification-delete' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="Удалить сообщение" title="Удалить"><svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg></button></form>
+                                {% if not notification.is_read %}<form method="post" action="{% url 'notification-mark-read' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="Отметить прочитанным" title="Отметить прочитанным"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg></button></form>{% endif %}
+                            </div>
+                        </article>
+                    {% empty %}
+                        <p class="inbox-empty-state">Сейчас у вас нет почты.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </dialog>
+    {% endif %}
+    <script src="{% static 'js/home.js' %}?v=5" defer></script>
 </body>
 </html>
-
-

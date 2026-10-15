@@ -4,8 +4,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from PIL import Image
+from core.models import Notification
 from institutions.models import Institution, InstitutionPhoto, Program, ProgramDocumentRequirement, Review
-from students.models import InstitutionFollow
+from students.models import InstitutionFollow, StudentProfile
 
 
 class InstitutionSearchTests(TestCase):
@@ -334,17 +335,27 @@ class InstitutionSearchTests(TestCase):
 
     def test_student_can_follow_and_unfollow_approved_institution(self):
         student = get_user_model().objects.create_user(username='follow-approved', password='Pass123!', role='student')
+        student_profile = StudentProfile.objects.create(user=student, full_name='Подписчик')
         self.client.force_login(student)
         follow_url = reverse('toggle-institution-follow', args=[self.moscow.pk])
 
         response = self.client.post(follow_url)
 
         self.assertRedirects(response, reverse('institution-detail', args=[self.moscow.pk]))
-        self.assertTrue(InstitutionFollow.objects.filter(student=student, institution=self.moscow).exists())
+        follow = InstitutionFollow.objects.get(student=student, institution=self.moscow)
+        follow_notice = Notification.objects.get(user=self.moscow.owner, follow=follow)
+        self.assertEqual(follow_notice.actor, student)
+        self.assertEqual(follow_notice.kind, 'institution_follow')
         self.assertContains(self.client.get(reverse('institution-detail', args=[self.moscow.pk])), 'Отписаться от заведения')
+        self.client.force_login(self.moscow.owner)
+        inbox = self.client.get(reverse('home'))
+        self.assertContains(inbox, student_profile.full_name)
+        self.assertContains(inbox, 'Посмотреть профиль абитуриента')
 
+        self.client.force_login(student)
         self.client.post(follow_url)
         self.assertFalse(InstitutionFollow.objects.filter(student=student, institution=self.moscow).exists())
+        self.assertFalse(Notification.objects.filter(pk=follow_notice.pk).exists())
 
     def test_unapproved_institution_owner_returns_to_dashboard_after_edit(self):
         owner = get_user_model().objects.create_user(username='pending-owner', password='Pass123!', role='institution')

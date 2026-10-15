@@ -5,7 +5,9 @@ from django.test import TestCase
 from django.urls import reverse
 from applications.models import Application, ApplicationDocument
 from applications.storage import PrivateApplicationStorage
+from core.models import Notification
 from institutions.models import Institution, Program, ProgramDocumentRequirement
+from students.models import StudentProfile
 
 
 class ApplicationTests(TestCase):
@@ -47,7 +49,54 @@ class ApplicationTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Application.objects.filter(student=self.student).exists())
+        self.assertTrue(StudentProfile.objects.filter(user=self.student).exists())
+        notification = Notification.objects.get(user=self.institution_owner, kind='application')
+        self.assertEqual(notification.application.student, self.student)
         self.assertContains(self.client.get(reverse('application-dashboard')), 'Программирование')
+
+    def test_application_detail_is_visible_only_to_parties_and_links_to_student_profile(self):
+        application = Application.objects.create(
+            student=self.student,
+            institution=self.institution,
+            program=self.program,
+            message='Моё заявление',
+        )
+        profile = StudentProfile.objects.create(user=self.student, full_name='Абитуриент заявления')
+        profile_url = reverse('student-detail', args=[profile.pk])
+
+        self.client.force_login(self.institution_owner)
+        response = self.client.get(reverse('application-detail', args=[application.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Моё заявление')
+        self.assertContains(response, 'Перейти в профиль абитуриента')
+        self.assertContains(response, profile_url)
+
+        outsider = get_user_model().objects.create_user(username='application-outsider', password='Pass123!', role='institution')
+        self.client.force_login(outsider)
+        self.assertEqual(self.client.get(reverse('application-detail', args=[application.pk])).status_code, 403)
+
+    def test_student_receives_one_notification_for_each_new_accepted_or_rejected_status(self):
+        application = Application.objects.create(
+            student=self.student,
+            institution=self.institution,
+            program=self.program,
+            status='sent',
+        )
+        self.client.force_login(self.institution_owner)
+
+        self.client.post(reverse('update-application-status', args=[application.pk]), {'status': 'accepted'})
+        self.client.post(reverse('update-application-status', args=[application.pk]), {'status': 'accepted'})
+
+        self.assertEqual(Notification.objects.filter(user=self.student, kind='application_status').count(), 1)
+        self.client.force_login(self.student)
+        self.assertContains(self.client.get(reverse('home')), 'Заявление принято')
+
+        self.client.force_login(self.institution_owner)
+        self.client.post(reverse('update-application-status', args=[application.pk]), {'status': 'rejected'})
+        notifications = Notification.objects.filter(user=self.student, kind='application_status')
+        self.assertEqual(notifications.count(), 2)
+        self.assertTrue(notifications.filter(title='Заявление отклонено').exists())
 
     def test_duplicate_application_is_rejected(self):
         Application.objects.create(

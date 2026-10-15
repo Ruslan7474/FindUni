@@ -10,6 +10,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from applications.models import Application
+from core.models import Notification
+from institutions.models import Institution
 from .forms import AcademicGradeForm, CommentForm, EducationEntryForm, StudentProfileForm, TestScoreForm
 from .models import AcademicGrade, Comment, CommentVote, EducationEntry, InstitutionFollow, StudentFriendship, StudentProfile, TestScore
 
@@ -261,11 +263,29 @@ def manage_friend(request, pk):
         if reverse_request:
             reverse_request.status = 'accepted'
             reverse_request.save(update_fields=['status'])
+            Notification.objects.filter(user=request.user, friendship=reverse_request).update(is_read=True)
             if not created and outgoing.status != 'accepted':
                 outgoing.status = 'accepted'
                 outgoing.save(update_fields=['status'])
             messages.success(request, 'Теперь вы друзья.')
         elif created:
+            sender_profile, _ = StudentProfile.objects.get_or_create(
+                user=request.user,
+                defaults={'full_name': request.user.get_full_name()},
+            )
+            sender_name = (
+                sender_profile.full_name if sender_profile.full_name
+                else request.user.get_full_name()
+                or 'Абитуриент'
+            )
+            Notification.objects.create(
+                user=target.user,
+                actor=request.user,
+                friendship=outgoing,
+                kind='friend_request',
+                title='Запрос дружбы',
+                body=f'{sender_name} хочет добавить вас в друзья.',
+            )
             messages.success(request, 'Запрос дружбы отправлен.')
         else:
             messages.info(request, 'Запрос дружбы уже отправлен.')
@@ -279,6 +299,7 @@ def manage_friend(request, pk):
             if incoming:
                 incoming.status = 'accepted'
                 incoming.save(update_fields=['status'])
+                Notification.objects.filter(user=request.user, friendship=incoming).update(is_read=True)
                 outgoing, created = StudentFriendship.objects.get_or_create(
                     from_student=request.user,
                     to_student=target.user,
@@ -348,6 +369,14 @@ def add_comment(request, pk):
                 is_removed=False,
             )
         comment.save()
+        Notification.objects.create(
+            user=profile.user,
+            kind='comment',
+            title='Комментарий к вашей странице',
+            body=f'{request.user.get_full_name() or request.user.email or "Пользователь"} оставил комментарий: {comment.text[:180]}',
+            comment=comment,
+            actor=request.user,
+        )
     else:
         messages.error(request, 'Комментарий не отправлен. Проверьте текст (до 500 символов).')
     return redirect(f'{reverse("student-detail", args=[pk])}#comments')

@@ -1,0 +1,56 @@
+.nav-mail-button{position:relative;flex:0 0 40px}
+.nav-mail-count{position:absolute;top:-5px;right:-5px;display:grid;min-width:18px;height:18px;place-items:center;padding:0 4px;border:2px solid var(--paper);border-radius:10px;color:var(--ink);background:var(--gold);font-size:9px;font-weight:900;line-height:1}
+.inbox-dialog{width:min(680px,calc(100% - 28px));max-height:min(760px,calc(100dvh - 28px));padding:0;overflow:hidden;border:1px solid var(--line);border-radius:20px;color:var(--ink);background:var(--paper);box-shadow:0 24px 80px rgb(17 37 45 / 30%)}
+.inbox-dialog::backdrop{background:rgb(15 33 40 / 58%);backdrop-filter:blur(3px)}
+.inbox-dialog-shell{display:flex;max-height:min(760px,calc(100dvh - 28px));flex-direction:column}
+.inbox-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;border-bottom:1px solid var(--line)}
+.inbox-dialog-header .section-kicker{margin:0 0 4px;color:var(--gold-deep);font-size:10px;font-weight:800;text-transform:uppercase}
+.inbox-dialog-header h2{margin:0;font-size:24px}
+.inbox-dialog-close{flex:0 0 auto}
+.inbox-toolbar{display:flex;flex-wrap:wrap;gap:9px;padding:14px 24px;border-bottom:1px solid var(--line)}
+.inbox-toolbar form{margin:0}
+.inbox-toolbar .button{min-height:38px;padding:0 12px;font-size:11px}
+.inbox-toolbar .button:disabled{cursor:not-allowed;opacity:.48;transform:none}
+.inbox-message-list{display:grid;gap:10px;overflow-y:auto;padding:18px 24px 24px}
+.inbox-message{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:start;gap:12px;padding:15px 16px;border:1px solid var(--line);border-radius:13px;background:var(--white);overflow-wrap:anywhere}
+.inbox-message-avatar{display:grid;width:42px;height:42px;overflow:hidden;place-items:center;border-radius:50%;color:var(--ink);background:rgb(233 196 106 / 28%);font-size:16px;font-weight:850}
+.inbox-message-avatar img{width:100%;height:100%;object-fit:cover}
+.inbox-message-content{min-width:0}
+.inbox-message-content>h3{margin:0 0 5px;font-size:14px;overflow-wrap:anywhere}
+.inbox-message-subject{margin:9px 0 4px;font-size:12px;overflow-wrap:anywhere}
+.inbox-message.is-unread{border-color:rgb(212 169 61 / 58%);box-shadow:inset 3px 0 var(--gold)}
+.inbox-message-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;color:var(--muted);font-size:10px;font-weight:750}
+.inbox-message-meta span{color:var(--gold-deep)}
+.inbox-message p{margin:0;color:var(--muted);font-size:12px;line-height:1.7;white-space:pre-line}
+.inbox-message-link{display:inline-block;margin-top:10px;color:var(--ink);font-size:11px;font-weight:850;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.inbox-message-actions{display:flex;align-self:end;gap:6px}
+.inbox-message-actions form{margin:0}
+.inbox-action-button{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--line);border-radius:9px;color:var(--muted);background:transparent;cursor:pointer}
+.inbox-action-button:hover{border-color:var(--gold);color:var(--ink);background:rgb(233 196 106 / 18%)}
+.inbox-action-button .icon{width:16px;height:16px}
+.inbox-accept-form{margin-top:10px}
+.inbox-accept-form .button{min-height:36px;padding:0 12px;font-size:11px}
+.inbox-empty-state{padding:30px 12px;margin:0;color:var(--muted);font-size:14px;text-align:center}
+.theme-dark .nav-mail-count{border-color:#172f38}
+.theme-dark .inbox-dialog{border-color:rgb(255 255 255 / 14%);color:var(--ink);background:#172f38}
+.theme-dark .inbox-message{border-color:rgb(255 255 255 / 14%);background:#21404b}
+.theme-dark .inbox-message.is-unread{border-color:rgb(233 196 106 / 65%)}
+.theme-dark .inbox-message-meta span{color:var(--gold)}
+.theme-dark .inbox-message-link{color:var(--gold)}
+.large-text .inbox-message-content>h3{font-size:18px}
+.large-text .inbox-message-subject{font-size:15px}
+.large-text .inbox-message p{font-size:15px}
+.large-text .inbox-message-meta{font-size:12px}
+.application-detail-page{display:grid;gap:16px;width:min(900px,calc(100% - 40px));padding:40px 0 64px;margin:0 auto}
+.application-detail-card{padding:26px;border:1px solid var(--line);border-radius:17px;background:var(--white)}
+.application-detail-card h1{margin:6px 0 18px;font-size:clamp(22px,4vw,34px);overflow-wrap:anywhere}
+.application-detail-card h2{font-size:17px}
+.application-detail-card p,.application-detail-card li{color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.application-detail-card a:not(.button){color:var(--ink);font-weight:800;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.application-status-form{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding-top:18px;border-top:1px solid var(--line);margin-top:18px}
+.application-status-form label{font-size:12px;font-weight:800}
+.application-status-form select{min-height:42px;padding:0 10px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:var(--paper)}
+.theme-dark .application-detail-card{background:#21404b}
+.theme-dark .application-status-form select{color:var(--ink);background:#172f38}
+@media(max-width:540px){.inbox-dialog{width:calc(100% - 16px);max-height:calc(100dvh - 16px);border-radius:15px}.inbox-dialog-shell{max-height:calc(100dvh - 16px)}.inbox-dialog-header{padding:18px 16px}.inbox-toolbar{padding:12px 16px}.inbox-toolbar form{flex:1 1 150px}.inbox-toolbar .button{width:100%;min-height:42px}.inbox-message-list{gap:8px;padding:12px 14px 16px}.inbox-message{grid-template-columns:36px minmax(0,1fr) auto;gap:9px;padding:11px}.inbox-message-avatar{width:36px;height:36px}.inbox-message-actions{flex-direction:column}.inbox-action-button{width:32px;height:32px}.application-detail-page{width:calc(100% - 28px);padding:26px 0 42px}.application-detail-card{padding:19px}.application-status-form{align-items:stretch;flex-direction:column}.application-status-form select,.application-status-form .button{width:100%}}
+@media(prefers-reduced-motion:reduce){.nav-mail-count,.inbox-action-button{transition:none}}

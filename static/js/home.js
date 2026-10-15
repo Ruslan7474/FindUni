@@ -157,6 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHistory();
   }
 
+  const inboxDialog = document.querySelector("#inbox-dialog");
+  if (inboxDialog) {
+    const closeInbox = inboxDialog.querySelector(".inbox-dialog-close");
+    document.querySelectorAll("[data-inbox-open]").forEach((button) => {
+      button.addEventListener("click", () => inboxDialog.showModal());
+    });
+    closeInbox.addEventListener("click", () => inboxDialog.close());
+    inboxDialog.addEventListener("click", (event) => {
+      if (event.target === inboxDialog) inboxDialog.close();
+    });
+  }
+
   document.querySelectorAll(".city-picker").forEach((picker) => {
     const trigger = picker.querySelector(".picker-trigger");
     const valueInput = picker.querySelector('input[type="hidden"]');

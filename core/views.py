@@ -1,9 +1,12 @@
 from django.conf import settings
 from django.db.models import Avg, Count, Min, Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
+from .models import Notification
 from institutions.models import Institution, Program
 
 
@@ -103,3 +106,42 @@ def large_text_switch(request):
     else:
         response.set_cookie('large_text', '1', max_age=60 * 60 * 24 * 365, path='/', httponly=True, samesite='Lax', secure=request.is_secure())
     return response
+
+
+def _inbox_return_url(request):
+    redirect_to = request.POST.get('next', '')
+    if not url_has_allowed_host_and_scheme(
+        redirect_to,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return reverse('home')
+    return redirect_to
+
+
+@login_required
+@require_POST
+def mark_inbox_read(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return redirect(_inbox_return_url(request))
+
+
+@login_required
+@require_POST
+def mark_notification_read(request, pk):
+    Notification.objects.filter(user=request.user, pk=pk).update(is_read=True)
+    return redirect(_inbox_return_url(request))
+
+
+@login_required
+@require_POST
+def delete_inbox(request):
+    Notification.objects.filter(user=request.user).delete()
+    return redirect(_inbox_return_url(request))
+
+
+@login_required
+@require_POST
+def delete_notification(request, pk):
+    Notification.objects.filter(user=request.user, pk=pk).delete()
+    return redirect(_inbox_return_url(request))
