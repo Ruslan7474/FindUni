@@ -2,6 +2,7 @@
 .institution-list-cards .institution-list-card{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:0;overflow:hidden;padding:0;border-radius:14px}
 .institution-list-photo{display:grid;min-height:180px;overflow:hidden;place-items:center;color:var(--muted);background:rgb(38 70 83 / 5%)}
 .institution-list-photo img{width:100%;height:100%;min-height:180px;object-fit:cover}
+.institution-list-photo img{object-fit:contain;background:var(--white)}
 .institution-list-photo>.icon{width:38px;height:38px}
 .institution-list-info{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:8px;padding:20px}
 .institution-list-info h2{margin:0;font-size:18px;line-height:1.4;overflow-wrap:anywhere}

@@ -35,7 +35,10 @@ def login_view(request):
     else:
         form = EmailOrUsernameAuthenticationForm(request)
     form.fields['username'].label = 'Email'
-    form.fields['password'].label = 'Пароль'
+    form.fields['password'].label = {
+        'en': 'Password',
+        'ky': 'Сырсөз',
+    }.get(request.LANGUAGE_CODE, 'Пароль')
     return render(request, 'accounts/login.html', {'form': form})
 
 

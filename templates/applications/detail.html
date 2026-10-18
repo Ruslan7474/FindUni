@@ -1,30 +1,30 @@
 {% extends 'base.html' %}
-{% block title %}Заявление — FindUni{% endblock %}
+{% block title %}{% if request.LANGUAGE_CODE == 'en' %}Application{% elif request.LANGUAGE_CODE == 'ky' %}Арыз{% else %}Заявление{% endif %} — FindUni{% endblock %}
 {% block content %}
 <section class="application-detail-page">
-    <a class="button button-outline" href="{% url 'application-dashboard' %}">Ко всем заявлениям</a>
+    <a class="button button-outline" href="{% url 'application-dashboard' %}">{% if request.LANGUAGE_CODE == 'en' %}All applications{% elif request.LANGUAGE_CODE == 'ky' %}Бардык арыздар{% else %}Ко всем заявлениям{% endif %}</a>
     <article class="application-detail-card">
-        <p class="section-kicker">Заявление на поступление</p>
+        <p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}Admission application{% elif request.LANGUAGE_CODE == 'ky' %}Окууга кабыл алуу арызы{% else %}Заявление на поступление{% endif %}</p>
         <h1>{{ application.program.name }} — {{ application.institution.name }}</h1>
-        <p><strong>Абитуриент:</strong> {{ applicant_name }}</p>
-        {% if student_profile %}<p><a href="{% url 'student-detail' student_profile.pk %}">Перейти в профиль абитуриента</a></p>{% endif %}
-        <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
-        <p><strong>Дата отправки:</strong> {{ application.created_at|date:'j E Y, H:i' }}</p>
-        <section><h2>Сопроводительное сообщение</h2><p>{{ application.message|default:'Абитуриент не добавил сопроводительное сообщение.'|linebreaksbr }}</p></section>
+        <p><strong>{% if request.LANGUAGE_CODE == 'en' %}Applicant:{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриент:{% else %}Абитуриент:{% endif %}</strong> {{ applicant_name }}</p>
+        {% if student_profile %}<p><a href="{% url 'student-detail' student_profile.pk %}">{% if request.LANGUAGE_CODE == 'en' %}View applicant profile{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттин профилин көрүү{% else %}Перейти в профиль абитуриента{% endif %}</a></p>{% endif %}
+        <p><strong>{% if request.LANGUAGE_CODE == 'en' %}Status:{% elif request.LANGUAGE_CODE == 'ky' %}Абалы:{% else %}Статус:{% endif %}</strong> {{ application.get_status_display|translate_choice:request.LANGUAGE_CODE }}</p>
+        <p><strong>{% if request.LANGUAGE_CODE == 'en' %}Submitted:{% elif request.LANGUAGE_CODE == 'ky' %}Жөнөтүлгөн күнү:{% else %}Дата отправки:{% endif %}</strong> {{ application.created_at|date:'j E Y, H:i' }}</p>
+        <section><h2>{% if request.LANGUAGE_CODE == 'en' %}Message{% elif request.LANGUAGE_CODE == 'ky' %}Коштомо билдирүү{% else %}Сопроводительное сообщение{% endif %}</h2><p>{{ application.message|default:'Абитуриент не добавил сопроводительное сообщение.'|linebreaksbr }}</p></section>
         {% if application.documents.all %}
-            <section><h2>Документы заявления</h2><ul>{% for document in application.documents.all %}<li><a href="{% url 'application-document-download' document.pk %}">{{ document.name }} ({{ document.get_file_format_display }})</a></li>{% endfor %}</ul></section>
+            <section><h2>{% if request.LANGUAGE_CODE == 'en' %}Application documents{% elif request.LANGUAGE_CODE == 'ky' %}Арыздын документтери{% else %}Документы заявления{% endif %}</h2><ul>{% for document in application.documents.all %}<li><a href="{% url 'application-document-download' document.pk %}">{{ document.name }} ({{ document.get_file_format_display }})</a></li>{% endfor %}</ul></section>
         {% endif %}
         {% if can_update_status %}
             <form method="post" action="{% url 'update-application-status' application.pk %}" class="application-status-form">
                 {% csrf_token %}
-                <label for="application-status">Изменить статус</label>
+                <label for="application-status">{% if request.LANGUAGE_CODE == 'en' %}Change status{% elif request.LANGUAGE_CODE == 'ky' %}Арыздын абалын өзгөртүү{% else %}Изменить статус{% endif %}</label>
                 <select id="application-status" name="status">
-                    <option value="reviewing">На рассмотрении</option>
-                    <option value="documents">Нужны документы</option>
-                    <option value="accepted">Принято</option>
-                    <option value="rejected">Отклонено</option>
+                    <option value="reviewing">{% if request.LANGUAGE_CODE == 'en' %}Under review{% elif request.LANGUAGE_CODE == 'ky' %}Каралууда{% else %}На рассмотрении{% endif %}</option>
+                    <option value="documents">{% if request.LANGUAGE_CODE == 'en' %}Documents needed{% elif request.LANGUAGE_CODE == 'ky' %}Документтер керек{% else %}Нужны документы{% endif %}</option>
+                    <option value="accepted">{% if request.LANGUAGE_CODE == 'en' %}Accepted{% elif request.LANGUAGE_CODE == 'ky' %}Кабыл алынды{% else %}Принято{% endif %}</option>
+                    <option value="rejected">{% if request.LANGUAGE_CODE == 'en' %}Rejected{% elif request.LANGUAGE_CODE == 'ky' %}Четке кагылды{% else %}Отклонено{% endif %}</option>
                 </select>
-                <button class="button" type="submit">Сохранить статус</button>
+                <button class="button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Save status{% elif request.LANGUAGE_CODE == 'ky' %}Абалын сактоо{% else %}Сохранить статус{% endif %}</button>
             </form>
         {% endif %}
     </article>

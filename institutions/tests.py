@@ -91,6 +91,46 @@ class InstitutionSearchTests(TestCase):
 
         self.assertContains(response, '/media/logos/moscow-campus.jpg')
 
+    def test_institution_logo_url_is_used_on_profile_and_home_card(self):
+        self.moscow.logo_url = 'https://images.example.edu/moscow-logo.png'
+        self.moscow.save(update_fields=['logo_url'])
+
+        profile = self.client.get(reverse('institution-detail', args=[self.moscow.pk]))
+        home = self.client.get(reverse('home'))
+
+        self.assertContains(profile, 'https://images.example.edu/moscow-logo.png')
+        self.assertContains(home, 'https://images.example.edu/moscow-logo.png')
+
+    def test_institution_photo_url_is_used_in_catalog_card(self):
+        InstitutionPhoto.objects.create(
+            institution=self.moscow,
+            image_url='https://images.example.edu/moscow-campus.jpg',
+        )
+
+        response = self.client.get(reverse('institution-list'))
+
+        self.assertContains(response, 'https://images.example.edu/moscow-campus.jpg')
+
+    def test_institution_owner_can_save_photo_url_without_uploading_file(self):
+        self.client.force_login(self.moscow.owner)
+        response = self.client.post(reverse('dashboard'), {
+            'profile_type': 'institution',
+            'name': self.moscow.name,
+            'institution_type': self.moscow.institution_type,
+            'city': self.moscow.city,
+            'photos-TOTAL_FORMS': '1',
+            'photos-INITIAL_FORMS': '0',
+            'photos-MIN_NUM_FORMS': '0',
+            'photos-MAX_NUM_FORMS': '1000',
+            'photos-0-image_url': 'https://images.example.edu/moscow-campus.jpg',
+        })
+
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertTrue(InstitutionPhoto.objects.filter(
+            institution=self.moscow,
+            image_url='https://images.example.edu/moscow-campus.jpg',
+        ).exists())
+
     def test_institution_owner_can_open_unpublished_profile(self):
         owner = get_user_model().objects.create_user(username='private-owner', password='Pass123!', role='institution')
         institution = Institution.objects.create(owner=owner, name='Профиль на модерации')

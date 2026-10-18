@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.inbox',
             ],
+            'builtins': ['django.templatetags.i18n', 'core.templatetags.ui_labels'],
         },
     },
 ]
@@ -113,6 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'ru'
 LANGUAGES = [('ru', 'Русский'), ('en', 'English'), ('ky', 'Кыргызча')]
 LANGUAGE_COOKIE_NAME = 'language'
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
 TIME_ZONE = 'Europe/Moscow'
 

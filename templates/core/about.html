@@ -1,64 +1,65 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load static %}
 {% block title %}О FindUni — FindUni{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'css/about.css' %}?v=1">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/about.css' %}?v=2">{% endblock %}
 {% block content %}
 <div class="about-page">
 	<section class="about-hero" aria-labelledby="about-title">
 		<div class="about-hero-inner">
 			<div class="about-hero-copy">
-				<p class="section-kicker">О платформе</p>
-				<h1 id="about-title">Образование не должно быть <span>лабиринтом</span></h1>
-				<p class="about-lead">FindUni помогает абитуриентам находить и сравнивать университеты и колледжи по всему миру, изучать программы и условия поступления в одном месте.</p>
+				<p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}About the platform{% elif request.LANGUAGE_CODE == 'ky' %}Платформа жөнүндө{% else %}О платформе{% endif %}</p>
+				<h1 id="about-title">{% if request.LANGUAGE_CODE == 'en' %}Education should not be a <span>maze</span>{% elif request.LANGUAGE_CODE == 'ky' %}Билим алуу <span>лабиринт болбошу керек</span>{% else %}Образование не должно быть <span>лабиринтом</span>{% endif %}</h1>
+				<p class="about-lead">{% if request.LANGUAGE_CODE == 'en' %}FindUni helps applicants find and compare universities and colleges around the world, explore programs and admission requirements in one place.{% elif request.LANGUAGE_CODE == 'ky' %}FindUni абитуриенттерге дүйнө жүзүндөгү университеттерди жана колледждерди таап, салыштырууга, программаларды жана кабыл алуу шарттарын бир жерден изилдөөгө жардам берет.{% else %}FindUni помогает абитуриентам находить и сравнивать университеты и колледжи по всему миру, изучать программы и условия поступления в одном месте.{% endif %}</p>
 				<div class="about-hero-actions">
-					<a class="button" href="{% url 'institution-list' %}">Начать поиск <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
-					<a class="button button-outline" href="#mission">Наша миссия</a>
+					<a class="button" href="{% url 'institution-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Start searching{% elif request.LANGUAGE_CODE == 'ky' %}Издөөнү баштоо{% else %}Начать поиск{% endif %} <svg class="icon"><use href="#icon-arrow"/></svg></a>
+					<a class="button button-outline" href="#mission">{% if request.LANGUAGE_CODE == 'en' %}Our mission{% elif request.LANGUAGE_CODE == 'ky' %}Биздин миссиябыз{% else %}Наша миссия{% endif %}</a>
 				</div>
 			</div>
 			<div class="about-hero-visual">
 				<div class="about-photo-frame">
-					<img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&amp;fit=crop&amp;w=1200&amp;q=85" alt="Студенты вместе работают над учебным проектом">
+					<img src="{% static 'images/about-campus.png' %}" alt="Студент за работой в кампусе университета">
 				</div>
-				<div class="about-photo-note"><strong>От первого поиска до заявления</strong><span>Сравнивай условия и принимай решение на основе информации.</span></div>
+				<div class="about-photo-note"><strong>{% if request.LANGUAGE_CODE == 'en' %}From first search to application{% elif request.LANGUAGE_CODE == 'ky' %}Биринчи издөөдөн арызга чейин{% else %}От первого поиска до заявления{% endif %}</strong><span>{% if request.LANGUAGE_CODE == 'en' %}Compare requirements and make an informed decision.{% elif request.LANGUAGE_CODE == 'ky' %}Шарттарды салыштырып, маалыматка таянып чечим кабыл алыңыз.{% else %}Сравнивай условия и принимай решение на основе информации.{% endif %}</span></div>
 			</div>
 		</div>
 	</section>
 
 	<section class="about-mission" id="mission" aria-labelledby="mission-title">
 		<div class="about-mission-inner">
-			<div><p class="about-eyebrow">Зачем мы здесь</p><p class="about-mission-intro">Выбор образования влияет на годы жизни. Для такого решения недостаточно рекламного буклета.</p></div>
-			<div><h2 id="mission-title">Наша миссия — дать человеку не просто список вузов, а <span>уверенность в своём выборе.</span></h2><p>Мы собираем важную информацию в одном месте, показываем реальные условия поступления и помогаем пройти путь от первого поиска до заявления.</p></div>
+			<div><p class="about-eyebrow">{% if request.LANGUAGE_CODE == 'en' %}Why we are here{% elif request.LANGUAGE_CODE == 'ky' %}Эмне үчүн бул жердебиз{% else %}Зачем мы здесь{% endif %}</p><p class="about-mission-intro">{% if request.LANGUAGE_CODE == 'en' %}Education shapes years of life. A decision this important needs more than a brochure.{% elif request.LANGUAGE_CODE == 'ky' %}Билим тандоо жашоонун көп жылдарына таасир этет. Мындай чечим үчүн жарнамалык баракча жетишсиз.{% else %}Выбор образования влияет на годы жизни. Для такого решения недостаточно рекламного буклета.{% endif %}</p></div>
+			<div><h2 id="mission-title">{% if request.LANGUAGE_CODE == 'en' %}Our mission is to offer more than a list of institutions: <span>confidence in your choice.</span>{% elif request.LANGUAGE_CODE == 'ky' %}Биздин миссиябыз — жөн гана окуу жайлардын тизмесин эмес, <span>тандоого ишеним берүү.</span>{% else %}Наша миссия — дать человеку не просто список вузов, а <span>уверенность в своём выборе.</span>{% endif %}</h2><p>{% if request.LANGUAGE_CODE == 'en' %}We bring essential information together, show real admission requirements and help applicants move from their first search to submitting an application.{% elif request.LANGUAGE_CODE == 'ky' %}Маанилүү маалыматты бир жерге топтоп, кабыл алуунун чыныгы шарттарын көрсөтүп, биринчи издөөдөн арыз берүүгө чейин жардам беребиз.{% else %}Мы собираем важную информацию в одном месте, показываем реальные условия поступления и помогаем пройти путь от первого поиска до заявления.{% endif %}</p></div>
 		</div>
 	</section>
 
 	<section class="about-facts" aria-label="Данные FindUni">
-		<article class="about-fact"><strong>{{ institution_count }}</strong><h2>Учебные заведения</h2><p>зарегистрированы в FindUni</p></article>
-		<article class="about-fact"><strong>{{ program_count }}</strong><h2>Образовательные программы</h2><p>добавлены в систему заведениями</p></article>
+		<article class="about-fact"><strong>{{ institution_count }}</strong><h2>{% if request.LANGUAGE_CODE == 'en' %}Institutions{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайлар{% else %}Учебные заведения{% endif %}</h2><p>{% if request.LANGUAGE_CODE == 'en' %}registered on FindUni{% elif request.LANGUAGE_CODE == 'ky' %}FindUni'да катталган{% else %}зарегистрированы в FindUni{% endif %}</p></article>
+		<article class="about-fact"><strong>{{ program_count }}</strong><h2>{% if request.LANGUAGE_CODE == 'en' %}Education programs{% elif request.LANGUAGE_CODE == 'ky' %}Билим берүү программалары{% else %}Образовательные программы{% endif %}</h2><p>{% if request.LANGUAGE_CODE == 'en' %}added by institutions{% elif request.LANGUAGE_CODE == 'ky' %}окуу жайлар кошкон{% else %}добавлены в систему заведениями{% endif %}</p></article>
 	</section>
 
 	<section class="about-values" id="values" aria-labelledby="values-title">
-		<div class="about-section-heading"><p class="section-kicker">Наши принципы</p><h2 id="values-title">На чём построен FindUni</h2><p>Принципы, которыми мы руководствуемся при создании платформы.</p></div>
+		<div class="about-section-heading"><p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}Our principles{% elif request.LANGUAGE_CODE == 'ky' %}Биздин принциптер{% else %}Наши принципы{% endif %}</p><h2 id="values-title">{% if request.LANGUAGE_CODE == 'en' %}What FindUni is built on{% elif request.LANGUAGE_CODE == 'ky' %}FindUni эмнеге таянат{% else %}На чём построен FindUni{% endif %}</h2><p>{% if request.LANGUAGE_CODE == 'en' %}The principles that guide how we build the platform.{% elif request.LANGUAGE_CODE == 'ky' %}Платформаны түзүүдө биз карманган принциптер.{% else %}Принципы, которыми мы руководствуемся при создании платформы.{% endif %}</p></div>
 		<div class="about-values-grid">
-			<article><span>/ 01</span><h3>Понятность</h3><p>Важная информация и следующие шаги должны быть ясны абитуриенту.</p></article>
-			<article><span>/ 02</span><h3>Честность</h3><p>Показываем реальные сведения из профилей заведений, не подменяя их выдуманными цифрами.</p></article>
-			<article><span>/ 03</span><h3>Равный доступ</h3><p>Помогаем сравнивать возможности независимо от города и страны.</p></article>
-			<article><span>/ 04</span><h3>Приватность</h3><p>Личные данные абитуриента доступны только в рамках правил доступа платформы.</p></article>
+			<article><span>/ 01</span><h3>{% if request.LANGUAGE_CODE == 'en' %}Clarity{% elif request.LANGUAGE_CODE == 'ky' %}Түшүнүктүүлүк{% else %}Понятность{% endif %}</h3><p>{% if request.LANGUAGE_CODE == 'en' %}Essential information and next steps should be clear to every applicant.{% elif request.LANGUAGE_CODE == 'ky' %}Маанилүү маалымат жана кийинки кадамдар абитуриентке түшүнүктүү болушу керек.{% else %}Важная информация и следующие шаги должны быть ясны абитуриенту.{% endif %}</p></article>
+			<article><span>/ 02</span><h3>{% if request.LANGUAGE_CODE == 'en' %}Honesty{% elif request.LANGUAGE_CODE == 'ky' %}Чынчылдык{% else %}Честность{% endif %}</h3><p>{% if request.LANGUAGE_CODE == 'en' %}We show real information from institution profiles, without invented figures.{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайлардын профилдериндеги чыныгы маалыматты көрсөтөбүз, ойдон чыгарылган сандарды колдонбойбуз.{% else %}Показываем реальные сведения из профилей заведений, не подменяя их выдуманными цифрами.{% endif %}</p></article>
+			<article><span>/ 03</span><h3>{% if request.LANGUAGE_CODE == 'en' %}Equal access{% elif request.LANGUAGE_CODE == 'ky' %}Бирдей мүмкүнчүлүк{% else %}Равный доступ{% endif %}</h3><p>{% if request.LANGUAGE_CODE == 'en' %}We help compare opportunities regardless of city or country.{% elif request.LANGUAGE_CODE == 'ky' %}Шаарга жана өлкөгө карабастан мүмкүнчүлүктөрдү салыштырууга жардам беребиз.{% else %}Помогаем сравнивать возможности независимо от города и страны.{% endif %}</p></article>
+			<article><span>/ 04</span><h3>{% if request.LANGUAGE_CODE == 'en' %}Privacy{% elif request.LANGUAGE_CODE == 'ky' %}Купуялуулук{% else %}Приватность{% endif %}</h3><p>{% if request.LANGUAGE_CODE == 'en' %}Applicants' personal data is available only according to the platform's access rules.{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттердин жеке маалыматы платформадагы жеткиликтүүлүк эрежелерине ылайык гана көрсөтүлөт.{% else %}Личные данные абитуриента доступны только в рамках правил доступа платформы.{% endif %}</p></article>
 		</div>
 	</section>
 
 	<section class="about-faq" id="faq" aria-labelledby="faq-title">
-		<div class="about-faq-intro"><p class="section-kicker">Коротко о важном</p><h2 id="faq-title">Частые вопросы</h2><p>Ответы о поиске, программах и подаче заявлений в FindUni.</p></div>
+		<div class="about-faq-intro"><p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}The essentials{% elif request.LANGUAGE_CODE == 'ky' %}Маанилүү маалымат{% else %}Коротко о важном{% endif %}</p><h2 id="faq-title">{% if request.LANGUAGE_CODE == 'en' %}Frequently asked questions{% elif request.LANGUAGE_CODE == 'ky' %}Көп берилген суроолор{% else %}Частые вопросы{% endif %}</h2><p>{% if request.LANGUAGE_CODE == 'en' %}Answers about searching, programs and applications on FindUni.{% elif request.LANGUAGE_CODE == 'ky' %}FindUni'да издөө, программалар жана арыз берүү жөнүндө жооптор.{% else %}Ответы о поиске, программах и подаче заявлений в FindUni.{% endif %}</p></div>
 		<div class="about-faq-list">
-			<details open><summary>FindUni — это бесплатный сервис?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Поиск, сравнение заведений, создание профиля и отправка заявлений доступны абитуриентам бесплатно.</p></details>
-			<details><summary>Откуда берётся информация о программах?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Информацию добавляют учебные заведения. Перед публикацией профиль проходит модерацию.</p></details>
-			<details><summary>Кто увидит мои оценки и контакты?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Полные данные доступны владельцу профиля, администраторам и связанному с заявлением учебному заведению согласно настройкам приватности.</p></details>
-			<details><summary>Можно ли подать заявления в несколько мест?<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>Да. Вы можете подать заявления в несколько заведений и отслеживать их статусы в личном кабинете.</p></details>
+			<details open><summary>{% if request.LANGUAGE_CODE == 'en' %}Is FindUni free to use?{% elif request.LANGUAGE_CODE == 'ky' %}FindUni акысызбы?{% else %}FindUni — это бесплатный сервис?{% endif %}<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>{% if request.LANGUAGE_CODE == 'en' %}Searching, comparing institutions, creating a profile and submitting applications are free for applicants.{% elif request.LANGUAGE_CODE == 'ky' %}Издөө, окуу жайларды салыштыруу, профиль түзүү жана арыз берүү абитуриенттер үчүн акысыз.{% else %}Поиск, сравнение заведений, создание профиля и отправка заявлений доступны абитуриентам бесплатно.{% endif %}</p></details>
+			<details><summary>{% if request.LANGUAGE_CODE == 'en' %}Where does program information come from?{% elif request.LANGUAGE_CODE == 'ky' %}Программалар тууралуу маалымат кайдан алынат?{% else %}Откуда берётся информация о программах?{% endif %}<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>{% if request.LANGUAGE_CODE == 'en' %}Institutions add this information. Profiles are moderated before publication.{% elif request.LANGUAGE_CODE == 'ky' %}Маалыматты окуу жайлар кошот. Жарыялоодон мурда профилдер модерациядан өтөт.{% else %}Информацию добавляют учебные заведения. Перед публикацией профиль проходит модерацию.{% endif %}</p></details>
+			<details><summary>{% if request.LANGUAGE_CODE == 'en' %}Who can see my grades and contact details?{% elif request.LANGUAGE_CODE == 'ky' %}Бааларымды жана байланыш маалыматымды ким көрөт?{% else %}Кто увидит мои оценки и контакты?{% endif %}<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>{% if request.LANGUAGE_CODE == 'en' %}Full details are available to the profile owner, administrators and the institution connected to an application, according to privacy settings.{% elif request.LANGUAGE_CODE == 'ky' %}Купуялык жөндөөлөрүнө ылайык, толук маалыматты профиль ээси, администраторлор жана арыз байланышкан окуу жай көрө алат.{% else %}Полные данные доступны владельцу профиля, администраторам и связанному с заявлением учебному заведению согласно настройкам приватности.{% endif %}</p></details>
+			<details><summary>{% if request.LANGUAGE_CODE == 'en' %}Can I apply to more than one institution?{% elif request.LANGUAGE_CODE == 'ky' %}Бир нече окуу жайга тапшырсам болобу?{% else %}Можно ли подать заявления в несколько мест?{% endif %}<svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></summary><p>{% if request.LANGUAGE_CODE == 'en' %}Yes. You can apply to several institutions and track each application's status in your account.{% elif request.LANGUAGE_CODE == 'ky' %}Ооба. Бир нече окуу жайга тапшырып, арыздардын абалын жеке кабинетиңизден көрө аласыз.{% else %}Да. Вы можете подать заявления в несколько заведений и отслеживать их статусы в личном кабинете.{% endif %}</p></details>
 		</div>
 	</section>
 
 	<section class="about-cta" aria-labelledby="about-cta-title">
-		<div><p>Найди своё направление</p><h2 id="about-cta-title">Будущее начинается с понятного выбора</h2><span>Изучи программы и условия поступления без лишней сложности.</span></div>
-		<a class="button" href="{% url 'institution-list' %}">Открыть каталог <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+		<div><p>{% if request.LANGUAGE_CODE == 'en' %}Find your path{% elif request.LANGUAGE_CODE == 'ky' %}Багытыңды тап{% else %}Найди своё направление{% endif %}</p><h2 id="about-cta-title">{% if request.LANGUAGE_CODE == 'en' %}Your future starts with a clear choice{% elif request.LANGUAGE_CODE == 'ky' %}Келечек так тандоодон башталат{% else %}Будущее начинается с понятного выбора{% endif %}</h2><span>{% if request.LANGUAGE_CODE == 'en' %}Explore programs and admission requirements without the hassle.{% elif request.LANGUAGE_CODE == 'ky' %}Программаларды жана кабыл алуу шарттарын оңой изилдеңиз.{% else %}Изучи программы и условия поступления без лишней сложности.{% endif %}</span></div>
+		<a class="button" href="{% url 'institution-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Browse catalog{% elif request.LANGUAGE_CODE == 'ky' %}Каталогду ачуу{% else %}Открыть каталог{% endif %} <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
 	</section>
 </div>
 {% endblock %}

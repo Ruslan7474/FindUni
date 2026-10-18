@@ -1,19 +1,20 @@
 {% if subject_grade_wheels %}
 <section class="subject-grade-section" aria-labelledby="subject-grade-title">
     <div class="subject-grade-heading">
-        <div><p class="section-kicker">Учебные результаты</p><h2 id="subject-grade-title">Оценки по предметам</h2></div>
+        <div><p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}Academic results{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жыйынтыктары{% else %}Учебные результаты{% endif %}</p><h2 id="subject-grade-title">{% if request.LANGUAGE_CODE == 'en' %}Grades by subject{% elif request.LANGUAGE_CODE == 'ky' %}Сабактар боюнча баалар{% else %}Оценки по предметам{% endif %}</h2></div>
         {% if overall_gpa %}<div class="subject-gpa-summary"><span>GPA</span><strong>{{ overall_gpa }}</strong></div>{% endif %}
     </div>
     <div class="subject-grade-wheel-list">
         {% for grade in subject_grade_wheels %}
             <article class="subject-grade-wheel-card">
                 <div class="subject-grade-wheel" style="--grade-progress: {{ grade.progress }}%" role="img" aria-label="{{ grade.subject }}: {{ grade.value }} из пяти">
-                    <span class="subject-grade-icon" title="{{ grade.subject }}" aria-label="{{ grade.subject }}"><svg class="icon" aria-hidden="true"><use href="#icon-book"/></svg></span>
+                    <span class="subject-grade-icon" aria-hidden="true"><svg class="icon"><use href="#icon-book"/></svg></span>
                     <strong>{{ grade.value }}</strong>
                 </div>
+                <span class="subject-grade-name">{{ grade.subject }}</span>
             </article>
         {% endfor %}
     </div>
-    {% if show_grade_editor_link %}<a class="subject-grade-editor-link" href="{% url 'student-profile' %}#grades-title">Редактировать оценки</a>{% endif %}
+    {% if show_grade_editor_link %}<a class="subject-grade-editor-link" href="{% url 'student-profile' %}#grades-title">{% if request.LANGUAGE_CODE == 'en' %}Edit grades{% elif request.LANGUAGE_CODE == 'ky' %}Бааларды өзгөртүү{% else %}Редактировать оценки{% endif %}</a>{% endif %}
 </section>
 {% endif %}

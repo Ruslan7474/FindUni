@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Оставить отзыв — FindUni{% endblock %}
+{% block title %}{% if request.LANGUAGE_CODE == 'en' %}Leave a review{% elif request.LANGUAGE_CODE == 'ky' %}Пикир калтыруу{% else %}Оставить отзыв{% endif %} — FindUni{% endblock %}
 {% block content %}
 <section class="form-card">
-  <h1>Оставить отзыв</h1>
+  <h1>{% if request.LANGUAGE_CODE == 'en' %}Leave a review{% elif request.LANGUAGE_CODE == 'ky' %}Пикир калтыруу{% else %}Оставить отзыв{% endif %}</h1>
   <p>{{ institution.name }}</p>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="button" type="submit">Отправить</button>
+    <button class="button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Send{% elif request.LANGUAGE_CODE == 'ky' %}Жөнөтүү{% else %}Отправить{% endif %}</button>
   </form>
 </section>
 {% endblock %}

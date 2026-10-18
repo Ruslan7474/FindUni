@@ -47,7 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const historyEmpty = searchDialog.querySelector("#search-history-empty");
     const historyClear = searchDialog.querySelector(".search-history-clear");
     const historyKey = "finduni-search-history";
-    const scopeLabels = { university: "Университет", college: "Колледж", student: "Абитуриент" };
+    const scopeLabelsByLanguage = {
+      ru: { university: "Университет", college: "Колледж", student: "Абитуриент" },
+      en: { university: "University", college: "College", student: "Applicant" },
+      ky: { university: "Университет", college: "Колледж", student: "Абитуриент" },
+    };
+    const scopeLabels = scopeLabelsByLanguage[document.documentElement.lang] || scopeLabelsByLanguage.ru;
     const scopeButtons = [...searchDialog.querySelectorAll("[data-search-scope]")];
     let activeScope = "university";
     clearButton.hidden = searchInput.value.length === 0;
@@ -231,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await response.json();
       status.hidden = true;
-      comment.querySelectorAll(".profile-comment-vote-form").forEach((voteForm) => {
+      comment.querySelector(".profile-comment-actions").querySelectorAll(".profile-comment-vote-form").forEach((voteForm) => {
         const voteButton = voteForm.querySelector("button");
         const value = voteForm.querySelector('input[name="value"]').value;
         const count = value === "like" ? result.like_count : result.dislike_count;

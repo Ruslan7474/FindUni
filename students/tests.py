@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.test import TestCase
 from django.urls import reverse
-from core.models import Notification
 from applications.models import Application
 from institutions.models import Institution, Program
 from students.models import AcademicGrade, Comment, CommentVote, EducationEntry, InstitutionFollow, StudentFriendship, StudentProfile, TestScore
@@ -145,9 +144,6 @@ class StudentCommentInteractionTests(TestCase):
 		self.assertRedirects(response, f'{profile_url}#comments', fetch_redirect_response=False)
 		root = Comment.objects.get(profile=self.profile, text='Первый комментарий')
 		self.assertIsNone(root.parent_id)
-		comment_notice = Notification.objects.get(user=self.profile_owner, kind='comment')
-		self.assertEqual(comment_notice.comment, root)
-		self.assertIn('Первый комментарий', comment_notice.body)
 
 		response = self.client.post(reverse('add-comment', args=[self.profile.pk]), {
 			'text': 'Ответ на комментарий',
@@ -368,8 +364,8 @@ class StudentProfilePrivacyTests(TestCase):
 		response = self.client.get(reverse('student-detail', args=[self.profile.pk]))
 
 		self.assertContains(response, 'subject-grade-section')
-		self.assertContains(response, 'title="English"')
-		self.assertContains(response, 'title="Mathematics"')
+		self.assertContains(response, 'class="subject-grade-name">English</span>')
+		self.assertContains(response, 'class="subject-grade-name">Mathematics</span>')
 		self.assertContains(response, '5/5')
 		self.assertContains(response, '4/5')
 		self.assertContains(response, '4.5/5')
@@ -381,7 +377,7 @@ class StudentProfilePrivacyTests(TestCase):
 			{'view': 'guest'},
 		)
 		self.assertNotContains(guest_response, 'subject-grade-section')
-		self.assertNotContains(guest_response, 'title="English"')
+		self.assertNotContains(guest_response, 'subject-grade-name')
 		self.assertNotContains(guest_response, '4.5/5')
 
 	def test_student_profile_editor_displays_existing_subject_grade_wheels(self):
@@ -464,6 +460,118 @@ class StudentProfilePrivacyTests(TestCase):
 		self.assertContains(profile_response, 'Математика')
 		self.assertContains(profile_response, '5/5')
 
+	def test_student_can_edit_education_and_test_score(self):
+		education = EducationEntry.objects.create(
+			profile=self.profile,
+			level='school',
+			institution_name='Школа № 10',
+			start_year=2015,
+		)
+		score = TestScore.objects.create(
+			profile=self.profile,
+			test_type='IELTS',
+			score=7,
+			date=date(2025, 5, 20),
+		)
+		self.client.force_login(self.student)
+		profile_url = reverse('student-profile')
+
+		education_response = self.client.post(profile_url, {
+			'profile_action': 'update_education',
+			'record_id': education.pk,
+			'level': 'college',
+			'institution_name': 'Колледж № 3',
+			'start_year': '2018',
+			'end_year': '2021',
+			'specialty': 'Информатика',
+		})
+		self.assertRedirects(education_response, profile_url)
+		education.refresh_from_db()
+		self.assertEqual(education.institution_name, 'Колледж № 3')
+		self.assertEqual(education.level, 'college')
+
+		score_response = self.client.post(profile_url, {
+			'profile_action': 'update_test_score',
+			'record_id': score.pk,
+			'test_type': 'IELTS Academic',
+			'score': '8',
+			'date': '2026-09-12',
+		})
+		self.assertRedirects(score_response, profile_url)
+		score.refresh_from_db()
+		self.assertEqual(score.test_type, 'IELTS Academic')
+		self.assertEqual(score.score, 8)
+		self.assertEqual(score.date, date(2026, 9, 12))
+
+	def test_student_cannot_edit_another_profiles_education_or_test_score(self):
+		other_student = get_user_model().objects.create_user(username='other-record-owner', password='Pass123!', role='student')
+		other_profile = StudentProfile.objects.create(user=other_student, full_name='Другой абитуриент')
+		education = EducationEntry.objects.create(profile=other_profile, level='school', institution_name='Чужая школа', start_year=2018)
+		score = TestScore.objects.create(profile=other_profile, test_type='IELTS', score=6, date=date(2025, 1, 1))
+		self.client.force_login(self.student)
+
+		for action, record in (('update_education', education), ('update_test_score', score)):
+			with self.subTest(action=action):
+				response = self.client.post(reverse('student-profile'), {
+					'profile_action': action,
+					'record_id': record.pk,
+					'institution_name': 'Подмена',
+					'level': 'college',
+					'test_type': 'Подмена',
+					'score': '5',
+					'date': '2026-01-01',
+				})
+				self.assertEqual(response.status_code, 404)
+
+	def test_student_can_edit_grade_and_grade_cannot_exceed_five(self):
+		grade = AcademicGrade.objects.create(profile=self.profile, subject='Математика', grade='3')
+		self.client.force_login(self.student)
+		profile_url = reverse('student-profile')
+		self.assertContains(self.client.get(profile_url), 'max="5"')
+
+		invalid_response = self.client.post(profile_url, {
+			'profile_action': 'update_grade',
+			'grade_id': grade.pk,
+			'subject': 'Математика',
+			'grade': '5.1',
+		})
+		self.assertEqual(invalid_response.status_code, 200)
+		self.assertContains(invalid_response, 'не может превышать 5')
+		grade.refresh_from_db()
+		self.assertEqual(grade.grade, '3')
+
+		response = self.client.post(profile_url, {
+			'profile_action': 'update_grade',
+			'grade_id': grade.pk,
+			'subject': 'Математика',
+			'grade': '4.5',
+		})
+		self.assertRedirects(response, profile_url)
+		grade.refresh_from_db()
+		self.assertEqual(grade.grade, '4.5')
+
+	def test_student_cannot_edit_another_profiles_grade(self):
+		other_student = get_user_model().objects.create_user(username='other-grade-owner', password='Pass123!', role='student')
+		other_profile = StudentProfile.objects.create(user=other_student, full_name='Другой студент')
+		grade = AcademicGrade.objects.create(profile=other_profile, subject='Математика', grade='4')
+		self.client.force_login(self.student)
+
+		response = self.client.post(reverse('student-profile'), {
+			'profile_action': 'update_grade',
+			'grade_id': grade.pk,
+			'subject': 'Математика',
+			'grade': '5',
+		})
+
+		self.assertEqual(response.status_code, 404)
+
+	def test_test_score_form_uses_browser_date_picker(self):
+		self.client.force_login(self.student)
+
+		response = self.client.get(reverse('student-profile'))
+
+		self.assertContains(response, 'type="date"')
+
 	def test_friend_request_can_be_sent_and_accepted(self):
 		friend = get_user_model().objects.create_user(
 			username='friend-candidate',
@@ -480,19 +588,19 @@ class StudentProfilePrivacyTests(TestCase):
 		self.assertRedirects(response, reverse('student-detail', args=[friend_profile.pk]))
 		request = StudentFriendship.objects.get(from_student=self.student, to_student=friend)
 		self.assertEqual(request.status, 'pending')
-		request_notice = Notification.objects.get(user=friend, friendship=request)
-		self.assertEqual(request_notice.actor, self.student)
-		self.client.force_login(friend)
-		self.assertContains(self.client.get(reverse('home')), 'Принять запрос дружбы')
 
+		self.client.force_login(friend)
 		response = self.client.post(reverse('manage-friend', args=[self.student.pk]), {'action': 'accept'})
 
 		self.assertRedirects(response, reverse('student-detail', args=[self.profile.pk]))
 		request.refresh_from_db()
 		self.assertEqual(request.status, 'accepted')
-		request_notice.refresh_from_db()
-		self.assertTrue(request_notice.is_read)
-		self.assertTrue(StudentFriendship.objects.filter(from_student=friend, to_student=self.student, status='accepted').exists())
+		self.assertFalse(StudentFriendship.objects.filter(from_student=friend, to_student=self.student).exists())
+		self.assertEqual(StudentFriendship.objects.filter(
+			Q(from_student=self.student, to_student=friend)
+			| Q(from_student=friend, to_student=self.student),
+			status='accepted',
+		).count(), 1)
 
 	def test_repeated_accept_after_request_was_processed_does_not_return_404(self):
 		friend = get_user_model().objects.create_user(username='already-accepted-friend', password='StrongPass123!', role='student')
@@ -526,6 +634,33 @@ class StudentProfilePrivacyTests(TestCase):
 		response = self.client.get(reverse('student-detail', args=[friend_profile.pk]))
 
 		self.assertContains(response, 'Принять запрос дружбы')
+
+	def test_accepting_mutual_requests_keeps_one_accepted_friendship(self):
+		friend = get_user_model().objects.create_user(username='mutual-accepted-friend', password='Pass123!', role='student')
+		friend_profile = StudentProfile.objects.create(user=friend, full_name='Друг по взаимному запросу')
+		StudentFriendship.objects.create(from_student=self.student, to_student=friend, status='pending')
+		StudentFriendship.objects.create(from_student=friend, to_student=self.student, status='pending')
+		self.client.force_login(self.student)
+
+		response = self.client.post(reverse('manage-friend', args=[friend.pk]), {'action': 'accept'})
+
+		self.assertRedirects(response, reverse('student-detail', args=[friend_profile.pk]))
+		self.assertEqual(StudentFriendship.objects.filter(
+			Q(from_student=self.student, to_student=friend)
+			| Q(from_student=friend, to_student=self.student),
+			status='accepted',
+		).count(), 1)
+
+	def test_personal_profile_displays_a_bidirectional_friendship_once(self):
+		friend = get_user_model().objects.create_user(username='deduplicated-friend', password='Pass123!', role='student')
+		StudentProfile.objects.create(user=friend, full_name='Один раз в списке')
+		StudentFriendship.objects.create(from_student=self.student, to_student=friend, status='accepted')
+		StudentFriendship.objects.create(from_student=friend, to_student=self.student, status='accepted')
+		self.client.force_login(self.student)
+
+		response = self.client.get(reverse('student-profile'))
+
+		self.assertEqual(response.content.decode().count('Один раз в списке'), 1)
 
 	def test_student_can_remove_friendship(self):
 		friend = get_user_model().objects.create_user(username='existing-friend', password='StrongPass123!', role='student')

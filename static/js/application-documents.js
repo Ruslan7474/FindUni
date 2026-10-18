@@ -4,13 +4,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const documentPanel = form?.querySelector("#application-documents");
   const fields = documentPanel?.querySelector("[data-document-fields]");
   if (!form || !programSelect || !documentPanel || !fields) return;
+  const text = form.dataset;
 
   const renderRequirements = (requirements) => {
     fields.replaceChildren();
     if (requirements.length === 0) {
       const empty = document.createElement("p");
       empty.className = "application-documents-empty";
-      empty.textContent = "Для этой программы документы не требуются.";
+      empty.textContent = text.documentsNone;
       fields.append(empty);
       return;
     }
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapper.className = "application-document-field";
       label.htmlFor = `document-${requirement.id}`;
       label.append(document.createTextNode(requirement.name));
-      required.textContent = requirement.required ? "Обязательно" : "Необязательно";
+      required.textContent = requirement.required ? text.documentsRequired : text.documentsOptional;
       label.append(" ", required);
 
       input.id = `document-${requirement.id}`;
@@ -34,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       input.accept = requirement.format === "jpg" ? ".jpg,.jpeg" : `.${requirement.format}`;
       input.required = requirement.required;
 
-      format.textContent = `Формат: ${requirement.format_label}`;
+      format.textContent = `${text.documentsFormat}: ${requirement.format_label}`;
       wrapper.append(label, input, format);
       fields.append(wrapper);
     });
@@ -52,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const status = document.createElement("p");
     status.className = "application-documents-loading";
     status.setAttribute("role", "status");
-    status.textContent = "Загружаем список документов...";
+    status.textContent = text.documentsLoading;
     fields.replaceChildren(status);
 
     try {
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderRequirements(result.requirements);
     } catch {
       if (documentPanel.dataset.programId !== programId) return;
-      status.textContent = "Не удалось загрузить требования. Обновите страницу и попробуйте снова.";
+      status.textContent = text.documentsError;
     }
   });
 });

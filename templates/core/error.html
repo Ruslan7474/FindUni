@@ -1,0 +1,25 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>{{ status_code }} · FindUni</title>
+    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}?v=1">
+</head>
+<body>
+    <main class="error-page">
+        <a class="error-brand" href="/" aria-label="FindUni"><span class="error-brand-mark">F</span><span>FindUni</span></a>
+        <section class="error-content" aria-labelledby="error-title">
+            <p class="error-kicker">{% if language == 'en' %}FindUni status{% elif language == 'ky' %}FindUni абалы{% else %}Состояние FindUni{% endif %}</p>
+            <p class="error-code" aria-hidden="true">{{ status_code }}</p>
+            <h1 id="error-title">{{ title }}</h1>
+            <p class="error-message">{{ message }}</p>
+            {% if is_server_error %}<p class="error-notice">{% if language == 'en' %}You can try again in a little while.{% elif language == 'ky' %}Бир аздан кийин кайра аракет кылып көрүңүз.{% else %}Попробуйте зайти ещё раз чуть позже.{% endif %}</p>{% endif %}
+            <a class="error-home" href="/">{% if language == 'en' %}Return to homepage{% elif language == 'ky' %}Башкы бетке кайтуу{% else %}Вернуться на главную{% endif %}<span aria-hidden="true">→</span></a>
+        </section>
+        <footer class="error-footer">© 2026 FindUni</footer>
+    </main>
+</body>
+</html>

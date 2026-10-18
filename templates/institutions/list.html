@@ -1,60 +1,60 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Заведения — FindUni{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'css/catalog-lists.css' %}?v=1">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/catalog-lists.css' %}?v=2">{% endblock %}
 {% block content %}
 <section>
-  <h1>Заведения</h1>
+  <h1>{% if request.LANGUAGE_CODE == 'en' %}Institutions{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайлар{% else %}Заведения{% endif %}</h1>
   <form method="get" class="filters institution-filters">
-    <input class="filter-search-input" name="q" value="{{ request.GET.q }}" placeholder="Поиск по названию или городу">
+    <input class="filter-search-input" name="q" value="{{ request.GET.q }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Search by name or city{% elif request.LANGUAGE_CODE == 'ky' %}Аталышы же шаар боюнча издөө{% else %}Поиск по названию или городу{% endif %}">
     <div class="city-picker filter-picker custom-picker">
       <input type="hidden" name="city" value="{{ request.GET.city }}">
-      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{{ request.GET.city|default:'Город' }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
-      <div class="picker-menu" role="listbox" aria-label="Фильтр по городу">
-        <button class="picker-option" type="button" data-value="">Все города</button>
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{{ request.GET.city|default_if_none:''|default:'' }}{% if not request.GET.city %}{% if request.LANGUAGE_CODE == 'en' %}Country{% elif request.LANGUAGE_CODE == 'ky' %}Өлкө{% else %}Страна{% endif %}{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Filter by country{% elif request.LANGUAGE_CODE == 'ky' %}Өлкө боюнча чыпкалоо{% else %}Фильтр по стране{% endif %}">
+        <button class="picker-option" type="button" data-value="">{% if request.LANGUAGE_CODE == 'en' %}All countries{% elif request.LANGUAGE_CODE == 'ky' %}Бардык өлкөлөр{% else %}Все страны{% endif %}</button>
         {% for city in cities %}<button class="picker-option" type="button" data-value="{{ city }}">{{ city }}</button>{% endfor %}
       </div>
     </div>
     <div class="city-picker filter-picker custom-picker">
       <input type="hidden" name="type" value="{{ request.GET.type }}">
-      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% for value, label in types %}{% if request.GET.type == value %}{{ label }}{% endif %}{% endfor %}{% if not request.GET.type %}Тип заведения{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
-      <div class="picker-menu" role="listbox" aria-label="Фильтр по типу заведения">
-        <button class="picker-option" type="button" data-value="">Все типы</button>
-        {% for value, label in types %}<button class="picker-option" type="button" data-value="{{ value }}">{{ label }}</button>{% endfor %}
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% for value, label in types %}{% if request.GET.type == value %}{% if request.LANGUAGE_CODE == 'en' %}{% if value == 'college9' %}College after grade 9{% elif value == 'college11' %}College/university after grade 11{% else %}University{% endif %}{% elif request.LANGUAGE_CODE == 'ky' %}{% if value == 'college9' %}9-класстан кийинки колледж{% elif value == 'college11' %}11-класстан кийинки колледж/университет{% else %}Университет{% endif %}{% else %}{{ label }}{% endif %}{% endif %}{% endfor %}{% if not request.GET.type %}{% if request.LANGUAGE_CODE == 'en' %}Institution type{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайдын түрү{% else %}Тип заведения{% endif %}{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Filter by institution type{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайдын түрү боюнча чыпкалоо{% else %}Фильтр по типу заведения{% endif %}">
+        <button class="picker-option" type="button" data-value="">{% if request.LANGUAGE_CODE == 'en' %}All types{% elif request.LANGUAGE_CODE == 'ky' %}Бардык түрлөрү{% else %}Все типы{% endif %}</button>
+        {% for value, label in types %}<button class="picker-option" type="button" data-value="{{ value }}">{% if request.LANGUAGE_CODE == 'en' %}{% if value == 'college9' %}College after grade 9{% elif value == 'college11' %}College/university after grade 11{% else %}University{% endif %}{% elif request.LANGUAGE_CODE == 'ky' %}{% if value == 'college9' %}9-класстан кийинки колледж{% elif value == 'college11' %}11-класстан кийинки колледж/университет{% else %}Университет{% endif %}{% else %}{{ label }}{% endif %}</button>{% endfor %}
       </div>
     </div>
-    <input name="direction" value="{{ request.GET.direction }}" placeholder="Направление">
-    <input name="max_price" type="number" min="0" value="{{ request.GET.max_price }}" placeholder="Максимальная цена">
+    <input name="direction" value="{{ request.GET.direction }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Field of study{% elif request.LANGUAGE_CODE == 'ky' %}Окуу багыты{% else %}Направление{% endif %}">
+    <input name="max_price" type="number" min="0" value="{{ request.GET.max_price }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Maximum tuition{% elif request.LANGUAGE_CODE == 'ky' %}Максималдуу баа{% else %}Максимальная цена{% endif %}">
     <div class="city-picker filter-picker custom-picker">
       <input type="hidden" name="sort" value="{{ sort }}">
-      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% if sort == 'name' %}Название{% elif sort == 'price' %}Цена{% else %}Рейтинг{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
-      <div class="picker-menu" role="listbox" aria-label="Сортировка заведений">
-        <button class="picker-option" type="button" data-value="rating">Рейтинг</button>
-        <button class="picker-option" type="button" data-value="name">Название</button>
-        <button class="picker-option" type="button" data-value="price">Цена</button>
+      <button class="picker-trigger" type="button" aria-expanded="false" aria-haspopup="listbox"><span>{% if sort == 'name' %}{% if request.LANGUAGE_CODE == 'en' %}Name{% elif request.LANGUAGE_CODE == 'ky' %}Аталышы{% else %}Название{% endif %}{% elif sort == 'price' %}{% if request.LANGUAGE_CODE == 'en' %}Tuition{% elif request.LANGUAGE_CODE == 'ky' %}Баасы{% else %}Цена{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Rating{% elif request.LANGUAGE_CODE == 'ky' %}Рейтинг{% else %}Рейтинг{% endif %}{% endif %}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></button>
+      <div class="picker-menu" role="listbox" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Sort institutions{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайларды иреттөө{% else %}Сортировка заведений{% endif %}">
+        <button class="picker-option" type="button" data-value="rating">{% if request.LANGUAGE_CODE == 'en' %}Rating{% elif request.LANGUAGE_CODE == 'ky' %}Рейтинг{% else %}Рейтинг{% endif %}</button>
+        <button class="picker-option" type="button" data-value="name">{% if request.LANGUAGE_CODE == 'en' %}Name{% elif request.LANGUAGE_CODE == 'ky' %}Аталышы{% else %}Название{% endif %}</button>
+        <button class="picker-option" type="button" data-value="price">{% if request.LANGUAGE_CODE == 'en' %}Tuition{% elif request.LANGUAGE_CODE == 'ky' %}Баасы{% else %}Цена{% endif %}</button>
       </div>
     </div>
-    <button class="button" type="submit">Фильтры</button>
+    <button class="button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Apply filters{% elif request.LANGUAGE_CODE == 'ky' %}Чыпкаларды колдонуу{% else %}Фильтры{% endif %}</button>
   </form>
   <div class="cards institution-list-cards">
     {% for institution in institutions %}
       <article class="institution-list-card">
         <a class="institution-list-photo" href="{% url 'institution-detail' institution.pk %}" aria-label="Открыть {{ institution.name }}">
-          {% with photo=institution.photos.all|first %}{% if photo %}<img src="{{ photo.image.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% elif institution.logo %}<img src="{{ institution.logo.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% else %}<svg class="icon" aria-hidden="true"><use href="#icon-building"/></svg>{% endif %}{% endwith %}
+          {% with photo=institution.photos.all|first %}{% if photo and photo.image_url %}<img src="{{ photo.image_url }}" alt="Фото {{ institution.name }}" loading="lazy">{% elif photo and photo.image %}<img src="{{ photo.image.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% elif institution.logo_url %}<img src="{{ institution.logo_url }}" alt="Фото {{ institution.name }}" loading="lazy">{% elif institution.logo %}<img src="{{ institution.logo.url }}" alt="Фото {{ institution.name }}" loading="lazy">{% else %}<svg class="icon" aria-hidden="true"><use href="#icon-building"/></svg>{% endif %}{% endwith %}
         </a>
         <div class="institution-list-info">
           <h2><a href="{% url 'institution-detail' institution.pk %}">{{ institution.name }}</a></h2>
           <p>{{ institution.city }} · {{ institution.get_institution_type_display }}</p>
-          <p>Рейтинг: {% if institution.rating_count %}{{ institution.rating|floatformat:1 }} ({{ institution.rating_count }}){% else %}Нет оценок{% endif %}</p>
-          <a class="button button-outline" href="{% url 'institution-detail' institution.pk %}">Открыть заведение <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+          <p>{% if request.LANGUAGE_CODE == 'en' %}Rating{% elif request.LANGUAGE_CODE == 'ky' %}Рейтинг{% else %}Рейтинг{% endif %}: {% if institution.rating_count %}{{ institution.rating|floatformat:1 }} ({{ institution.rating_count }}){% else %}{% if request.LANGUAGE_CODE == 'en' %}No ratings{% elif request.LANGUAGE_CODE == 'ky' %}Баалар жок{% else %}Нет оценок{% endif %}{% endif %}</p>
+          <a class="button button-outline" href="{% url 'institution-detail' institution.pk %}">{% if request.LANGUAGE_CODE == 'en' %}Open institution{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайды ачуу{% else %}Открыть заведение{% endif %} <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
       </article>
-    {% empty %}<p>Заведения не найдены.</p>{% endfor %}
+    {% empty %}<p>{% if request.LANGUAGE_CODE == 'en' %}No institutions found.{% elif request.LANGUAGE_CODE == 'ky' %}Окуу жайлар табылган жок.{% else %}Заведения не найдены.{% endif %}</p>{% endfor %}
   </div>
   {% if page_obj.paginator.num_pages > 1 %}<nav class="catalog-pagination" aria-label="Страницы заведений">
-    {% if page_obj.has_previous %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">Назад</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Назад</span>{% endif %}
-    <span class="catalog-pagination-status">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">Дальше</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">Дальше</span>{% endif %}
+    {% if page_obj.has_previous %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">{% if request.LANGUAGE_CODE == 'en' %}Previous{% elif request.LANGUAGE_CODE == 'ky' %}Мурунку{% else %}Назад{% endif %}</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">{% if request.LANGUAGE_CODE == 'en' %}Previous{% elif request.LANGUAGE_CODE == 'ky' %}Мурунку{% else %}Назад{% endif %}</span>{% endif %}
+    <span class="catalog-pagination-status">{% if request.LANGUAGE_CODE == 'en' %}Page{% elif request.LANGUAGE_CODE == 'ky' %}Бет{% else %}Страница{% endif %} {{ page_obj.number }}/{% if request.LANGUAGE_CODE == 'en' %}of{% elif request.LANGUAGE_CODE == 'ky' %}ичинен{% else %}из{% endif %} {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="button button-outline" href="?{% if query_parameters %}{{ query_parameters }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">{% if request.LANGUAGE_CODE == 'en' %}Next{% elif request.LANGUAGE_CODE == 'ky' %}Кийинки{% else %}Дальше{% endif %}</a>{% else %}<span class="button button-outline is-disabled" aria-disabled="true">{% if request.LANGUAGE_CODE == 'en' %}Next{% elif request.LANGUAGE_CODE == 'ky' %}Кийинки{% else %}Дальше{% endif %}</span>{% endif %}
   </nav>{% endif %}
 </section>
 {% endblock %}

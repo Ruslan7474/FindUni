@@ -1,10 +1,51 @@
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from applications.models import Application
 from core.models import Announcement, Notification
+from core.views import forbidden, server_error
 from institutions.models import Institution, Program
+
+
+class ErrorPageTests(TestCase):
+    @override_settings(DEBUG=False)
+    def test_not_found_uses_branded_404_page(self):
+        response = self.client.get('/page-that-does-not-exist/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Страница не найдена', status_code=404)
+        self.assertContains(response, 'Вернуться на главную', status_code=404)
+
+    def test_401_502_and_503_pages_have_their_http_statuses(self):
+        cases = (
+            ('error-401', 401, 'Требуется авторизация'),
+            ('error-502', 502, 'Ошибка шлюза'),
+            ('service-unavailable', 503, 'Сервис временно недоступен'),
+        )
+        for route_name, status, message in cases:
+            with self.subTest(status=status):
+                response = self.client.get(reverse(route_name))
+                self.assertEqual(response.status_code, status)
+                self.assertContains(response, message, status_code=status)
+
+    def test_server_error_page_says_administrators_are_working_on_it(self):
+        request = RequestFactory().get('/broken-page/')
+        request.LANGUAGE_CODE = 'ru'
+
+        response = server_error(request)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, 'Администраторы уже в курсе', status_code=500)
+
+    def test_forbidden_handler_returns_a_branded_403_page(self):
+        request = RequestFactory().get('/restricted-page/')
+        request.LANGUAGE_CODE = 'ru'
+
+        response = forbidden(request)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, 'Доступ закрыт', status_code=403)
 
 
 class HomePageTests(TestCase):
@@ -19,7 +60,7 @@ class HomePageTests(TestCase):
         self.assertContains(response, 'Версия для слабовидящих')
         self.assertContains(response, 'Университет')
         self.assertContains(response, 'Колледж')
-        self.assertContains(response, 'Студент')
+        self.assertContains(response, 'Абитуриент')
         self.assertContains(response, 'История поиска')
         self.assertContains(response, 'Чаще всего ищут')
         self.assertContains(response, 'FindUni помогает сделать уверенный выбор')
@@ -240,6 +281,80 @@ class AccessibilityToggleTests(TestCase):
 
     def test_external_return_url_is_rejected(self):
         response = self.client.get(reverse('large-text-switch'), {'next': 'https://example.com/'})
+
+        self.assertRedirects(response, reverse('home'), fetch_redirect_response=False)
+
+    def test_accessibility_menu_applies_font_size_and_contrast(self):
+        font_response = self.client.get(reverse('accessibility-switch', args=['font-size', 'larger']), {'next': '/about/'})
+        self.assertRedirects(font_response, '/about/', fetch_redirect_response=False)
+        self.assertEqual(font_response.cookies['font_size'].value, 'larger')
+
+        contrast_response = self.client.get(reverse('accessibility-switch', args=['contrast', 'high']), {'next': '/about/'})
+        self.assertRedirects(contrast_response, '/about/', fetch_redirect_response=False)
+        self.assertEqual(contrast_response.cookies['high_contrast'].value, 'high')
+
+    def test_accessibility_menu_rejects_unknown_settings(self):
+        response = self.client.get(reverse('accessibility-switch', args=['contrast', 'extreme']))
+
+        self.assertRedirects(response, reverse('home'), fetch_redirect_response=False)
+
+
+class LanguageSwitchTests(TestCase):
+    def test_english_ui_is_rendered_across_public_pages(self):
+        self.client.cookies['language'] = 'en'
+        pages = (
+            (reverse('home'), 'Your path to education'),
+            (reverse('about'), 'About the platform'),
+            (reverse('how-to-apply'), 'I am an applicant'),
+            (reverse('institution-list'), 'Search by name or city'),
+            (reverse('student-list'), 'FindUni community'),
+            (reverse('login'), "Don't have an account?"),
+            (reverse('register'), 'Create an account'),
+        )
+
+        for url, translated_text in pages:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, translated_text)
+
+    def test_kyrgyz_ui_is_rendered_across_public_pages(self):
+        self.client.cookies['language'] = 'ky'
+        pages = (
+            (reverse('home'), 'Билимге карай жолуң'),
+            (reverse('about'), 'Платформа жөнүндө'),
+            (reverse('how-to-apply'), 'Мен абитуриентмин'),
+            (reverse('institution-list'), 'Аталышы же шаар боюнча издөө'),
+            (reverse('student-list'), 'FindUni коомчулугу'),
+            (reverse('login'), 'Аккаунтуңуз жокпу?'),
+            (reverse('register'), 'Аккаунт түзүү'),
+        )
+
+        for url, translated_text in pages:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, translated_text)
+
+    def test_homepage_uses_selected_interface_language(self):
+        self.client.cookies['language'] = 'en'
+
+        response = self.client.get(reverse('home'))
+
+        self.assertEqual(response.wsgi_request.LANGUAGE_CODE, 'en')
+        self.assertContains(response, 'Your path to education')
+        self.assertContains(response, 'Universities & colleges')
+        self.assertNotContains(response, 'Твой путь к образованию')
+
+    def test_language_switch_preserves_current_page_and_persists_language(self):
+        response = self.client.get(reverse('language-switch', args=['en']), {'next': '/about/?faq=1'})
+
+        self.assertRedirects(response, '/about/?faq=1', fetch_redirect_response=False)
+        self.assertEqual(response.cookies['language'].value, 'en')
+        self.assertEqual(response.cookies['language']['path'], '/')
+
+    def test_language_switch_rejects_external_return_url(self):
+        response = self.client.get(reverse('language-switch', args=['ky']), {'next': 'https://example.com/'})
 
         self.assertRedirects(response, reverse('home'), fetch_redirect_response=False)
 

@@ -6,7 +6,8 @@
 .subject-gpa-summary span{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .subject-gpa-summary strong{color:var(--ink);font-size:18px;font-weight:800}
 .subject-grade-wheel-list{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px}
-.subject-grade-wheel-card{display:grid;min-width:88px;justify-items:center;padding:4px}
+.subject-grade-wheel-card{display:grid;min-width:104px;justify-items:center;gap:5px;padding:4px}
+.subject-grade-name{max-width:118px;color:var(--ink);font-size:11px;font-weight:700;line-height:1.35;text-align:center;overflow-wrap:anywhere}
 .subject-grade-wheel{position:relative;display:grid;width:78px;height:78px;place-items:center;border-radius:50%;background:conic-gradient(var(--gold) var(--grade-progress),var(--line) 0)}
 .subject-grade-wheel::before{position:absolute;inset:6px;border:1px solid var(--line);border-radius:50%;background:var(--white);content:""}
 .subject-grade-wheel>strong{position:relative;z-index:1;margin-top:16px;font-size:12px;font-weight:800;line-height:1}
@@ -19,5 +20,5 @@
 .theme-dark .subject-grade-icon{border-color:#172f38;color:#264653;background:var(--gold)}
 .large-text .subject-grade-heading h2{font-size:23px}
 .large-text .subject-gpa-summary strong{font-size:20px}
-@media(max-width:540px){.subject-grade-section{gap:14px;padding:16px 0;margin-top:10px}.subject-grade-heading h2{font-size:18px}.subject-grade-wheel-list{gap:10px}.subject-grade-wheel-card{min-width:80px}.subject-grade-wheel{width:70px;height:70px}.subject-grade-wheel>strong{font-size:11px}}
+@media(max-width:540px){.subject-grade-section{gap:14px;padding:16px 0;margin-top:10px}.subject-grade-heading h2{font-size:18px}.subject-grade-wheel-list{gap:10px}.subject-grade-wheel-card{min-width:88px}.subject-grade-name{max-width:96px;font-size:10px}.subject-grade-wheel{width:70px;height:70px}.subject-grade-wheel>strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.subject-grade-icon{transition:none}}

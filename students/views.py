@@ -10,8 +10,6 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from applications.models import Application
-from core.models import Notification
-from institutions.models import Institution
 from .forms import AcademicGradeForm, CommentForm, EducationEntryForm, StudentProfileForm, TestScoreForm
 from .models import AcademicGrade, Comment, CommentVote, EducationEntry, InstitutionFollow, StudentFriendship, StudentProfile, TestScore
 
@@ -157,9 +155,42 @@ def profile(request):
     education_form = EducationEntryForm()
     test_score_form = TestScoreForm()
     grade_form = AcademicGradeForm()
+    grade_edit_forms = {}
+    open_grade_id = None
+    education_edit_forms = {}
+    test_score_edit_forms = {}
+    open_edit_type = ''
+    open_edit_id = None
     open_form = ''
     if request.method == 'POST':
         open_form = request.POST.get('profile_action', '')
+        edit_configs = {
+            'update_education': (EducationEntryForm, profile_obj.education),
+            'update_test_score': (TestScoreForm, profile_obj.test_scores),
+        }
+        if open_form in edit_configs:
+            form_class, related_records = edit_configs[open_form]
+            record = get_object_or_404(related_records, pk=request.POST.get('record_id'))
+            edit_form = form_class(request.POST, instance=record)
+            open_edit_type = open_form.removeprefix('update_')
+            open_edit_id = record.pk
+            if edit_form.is_valid():
+                edit_form.save()
+                messages.success(request, 'Запись обновлена.')
+                return redirect('student-profile')
+            if open_edit_type == 'education':
+                education_edit_forms[record.pk] = edit_form
+            else:
+                test_score_edit_forms[record.pk] = edit_form
+        if open_form == 'update_grade':
+            grade = get_object_or_404(profile_obj.grades, pk=request.POST.get('grade_id'))
+            grade_edit_form = AcademicGradeForm(request.POST, instance=grade)
+            open_grade_id = grade.pk
+            if grade_edit_form.is_valid():
+                grade_edit_form.save()
+                messages.success(request, 'Оценка обновлена.')
+                return redirect('student-profile')
+            grade_edit_forms[grade.pk] = grade_edit_form
         form_configs = {
             'education': (EducationEntryForm, EducationEntry, 'Запись об образовании добавлена.'),
             'test_score': (TestScoreForm, TestScore, 'Результат добавлен.'),
@@ -196,10 +227,32 @@ def profile(request):
         profile_obj.grades.exists(),
     )
     subject_grade_wheels, overall_gpa = _subject_grade_wheels(profile_obj.grades.all())
+    grade_entries = [
+        {
+            'grade': grade,
+            'form': grade_edit_forms.get(grade.pk) or AcademicGradeForm(instance=grade),
+        }
+        for grade in profile_obj.grades.all()
+    ]
+    education_entries = [
+        {
+            'entry': entry,
+            'form': education_edit_forms.get(entry.pk) or EducationEntryForm(instance=entry),
+        }
+        for entry in profile_obj.education.all()
+    ]
+    test_score_entries = [
+        {
+            'entry': entry,
+            'form': test_score_edit_forms.get(entry.pk) or TestScoreForm(instance=entry),
+        }
+        for entry in profile_obj.test_scores.all()
+    ]
     friendships = StudentFriendship.objects.filter(
         Q(from_student=request.user) | Q(to_student=request.user),
     ).select_related('from_student', 'to_student')
     friends = []
+    friend_user_ids = set()
     incoming_friend_requests = []
     outgoing_friend_requests = []
     for friendship in friendships:
@@ -207,7 +260,9 @@ def profile(request):
         other_profile = StudentProfile.objects.filter(user=other_user).first()
         entry = {'user': other_user, 'profile': other_profile}
         if friendship.status == 'accepted':
-            friends.append(entry)
+            if other_user.pk not in friend_user_ids:
+                friends.append(entry)
+                friend_user_ids.add(other_user.pk)
         elif friendship.to_student_id == request.user.pk:
             incoming_friend_requests.append(entry)
         else:
@@ -216,8 +271,11 @@ def profile(request):
         'profile': profile_obj,
         'display_name': profile_obj.full_name or request.user.get_full_name(),
         'education': profile_obj.education.all(),
+        'education_entries': education_entries,
         'test_scores': profile_obj.test_scores.all(),
+        'test_score_entries': test_score_entries,
         'grades': profile_obj.grades.all(),
+        'grade_entries': grade_entries,
         'subject_grade_wheels': subject_grade_wheels,
         'overall_gpa': overall_gpa,
         'applications': request.user.applications.select_related('institution', 'program').all(),
@@ -231,6 +289,10 @@ def profile(request):
         'education_form': education_form,
         'test_score_form': test_score_form,
         'grade_form': grade_form,
+        'grade_edit_forms': grade_edit_forms,
+        'open_grade_id': open_grade_id,
+        'open_edit_type': open_edit_type,
+        'open_edit_id': open_edit_id,
         'open_form': open_form,
         'profile_completion': round(sum(completion_checks) * 100 / len(completion_checks)),
     })
@@ -255,40 +317,24 @@ def manage_friend(request, pk):
             to_student=request.user,
             status='pending',
         ).first()
-        outgoing, created = StudentFriendship.objects.get_or_create(
-            from_student=request.user,
-            to_student=target.user,
-            defaults={'status': 'accepted' if reverse_request else 'pending'},
-        )
         if reverse_request:
             reverse_request.status = 'accepted'
             reverse_request.save(update_fields=['status'])
-            Notification.objects.filter(user=request.user, friendship=reverse_request).update(is_read=True)
-            if not created and outgoing.status != 'accepted':
-                outgoing.status = 'accepted'
-                outgoing.save(update_fields=['status'])
+            StudentFriendship.objects.filter(
+                from_student=request.user,
+                to_student=target.user,
+            ).delete()
             messages.success(request, 'Теперь вы друзья.')
-        elif created:
-            sender_profile, _ = StudentProfile.objects.get_or_create(
-                user=request.user,
-                defaults={'full_name': request.user.get_full_name()},
-            )
-            sender_name = (
-                sender_profile.full_name if sender_profile.full_name
-                else request.user.get_full_name()
-                or 'Абитуриент'
-            )
-            Notification.objects.create(
-                user=target.user,
-                actor=request.user,
-                friendship=outgoing,
-                kind='friend_request',
-                title='Запрос дружбы',
-                body=f'{sender_name} хочет добавить вас в друзья.',
-            )
-            messages.success(request, 'Запрос дружбы отправлен.')
         else:
-            messages.info(request, 'Запрос дружбы уже отправлен.')
+            _, created = StudentFriendship.objects.get_or_create(
+                from_student=request.user,
+                to_student=target.user,
+                defaults={'status': 'pending'},
+            )
+            if created:
+                messages.success(request, 'Запрос дружбы отправлен.')
+            else:
+                messages.info(request, 'Запрос дружбы уже отправлен.')
     elif action == 'accept':
         with transaction.atomic():
             incoming = StudentFriendship.objects.select_for_update().filter(
@@ -299,15 +345,10 @@ def manage_friend(request, pk):
             if incoming:
                 incoming.status = 'accepted'
                 incoming.save(update_fields=['status'])
-                Notification.objects.filter(user=request.user, friendship=incoming).update(is_read=True)
-                outgoing, created = StudentFriendship.objects.get_or_create(
+                StudentFriendship.objects.filter(
                     from_student=request.user,
                     to_student=target.user,
-                    defaults={'status': 'accepted'},
-                )
-                if not created and outgoing.status != 'accepted':
-                    outgoing.status = 'accepted'
-                    outgoing.save(update_fields=['status'])
+                ).delete()
         if incoming:
             messages.success(request, 'Запрос принят. Теперь вы друзья.')
         elif StudentFriendship.objects.filter(
@@ -369,14 +410,6 @@ def add_comment(request, pk):
                 is_removed=False,
             )
         comment.save()
-        Notification.objects.create(
-            user=profile.user,
-            kind='comment',
-            title='Комментарий к вашей странице',
-            body=f'{request.user.get_full_name() or request.user.email or "Пользователь"} оставил комментарий: {comment.text[:180]}',
-            comment=comment,
-            actor=request.user,
-        )
     else:
         messages.error(request, 'Комментарий не отправлен. Проверьте текст (до 500 символов).')
     return redirect(f'{reverse("student-detail", args=[pk])}#comments')

@@ -9,12 +9,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=27">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=32">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=34">
     <link rel="stylesheet" href="{% static 'css/profile-social.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'css/inbox.css' %}?v=2">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="{% if request.COOKIES.theme == 'dark' %}theme-dark{% endif %}{% if request.COOKIES.large_text == '1' %} large-text{% endif %}">
+<body class="{% if request.COOKIES.theme == 'dark' %}theme-dark{% endif %}{% if request.COOKIES.large_text == '1' %} large-text{% endif %}{% if request.COOKIES.font_size == 'large' %} font-size-large{% elif request.COOKIES.font_size == 'larger' %} font-size-larger{% endif %}{% if request.COOKIES.high_contrast == 'high' %} high-contrast{% endif %}">
     <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></symbol>
         <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
@@ -41,14 +42,26 @@
                 <span>Find<span class="brand-accent">Uni</span></span>
             </a>
             <nav class="primary-nav" aria-label="Основная навигация">
-                <a href="{% url 'home' %}">Главная</a>
-                <a href="{% url 'institution-list' %}">Вузы и колледжи</a>
-                <a href="{% url 'student-list' %}">Абитуриенты</a>
-                <a href="{% url 'how-to-apply' %}">Как поступить</a>
-                <a href="{% url 'about' %}">О нас</a>
+                <a href="{% url 'home' %}">{% if request.LANGUAGE_CODE == 'en' %}Home{% elif request.LANGUAGE_CODE == 'ky' %}Башкы бет{% else %}Главная{% endif %}</a>
+                <a href="{% url 'institution-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Universities & colleges{% elif request.LANGUAGE_CODE == 'ky' %}Университеттер жана колледждер{% else %}Вузы и колледжи{% endif %}</a>
+                <a href="{% url 'student-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Applicants{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттер{% else %}Абитуриенты{% endif %}</a>
+                <a href="{% url 'how-to-apply' %}">{% if request.LANGUAGE_CODE == 'en' %}How to apply{% elif request.LANGUAGE_CODE == 'ky' %}Кантип тапшыруу керек{% else %}Как поступить{% endif %}</a>
+                <a href="{% url 'about' %}">{% if request.LANGUAGE_CODE == 'en' %}About us{% elif request.LANGUAGE_CODE == 'ky' %}Биз жөнүндө{% else %}О нас{% endif %}</a>
             </nav>
             <div class="header-actions">
                 <a class="icon-button accessibility-toggle{% if request.COOKIES.large_text == '1' %} is-active{% endif %}" href="{% url 'large-text-switch' %}?next={{ request.get_full_path|urlencode }}" aria-label="{% if request.COOKIES.large_text == '1' %}Выключить увеличенный текст{% else %}Включить увеличенный текст{% endif %}" title="{% if request.COOKIES.large_text == '1' %}Увеличенный текст включён{% else %}Увеличить текст{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg><span class="accessibility-toggle-label">{% if request.COOKIES.large_text == '1' %}Текст увеличен{% else %}Крупный текст{% endif %}</span></a>
+                <details class="accessibility-menu">
+                    <summary class="accessibility-menu-trigger" aria-label="Версия для слабовидящих: настройки доступности">Aa</summary>
+                    <div class="accessibility-menu-panel">
+                        <strong>{% if request.LANGUAGE_CODE == 'en' %}Text size{% elif request.LANGUAGE_CODE == 'ky' %}Тексттин өлчөмү{% else %}Размер текста{% endif %}</strong>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'normal' %}?next={{ request.get_full_path|urlencode }}"{% if not request.COOKIES.font_size or request.COOKIES.font_size == 'normal' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Default{% elif request.LANGUAGE_CODE == 'ky' %}Кадимки{% else %}Обычный{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'large' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.font_size == 'large' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Large{% elif request.LANGUAGE_CODE == 'ky' %}Чоң{% else %}Крупный{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'larger' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.font_size == 'larger' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Extra large{% elif request.LANGUAGE_CODE == 'ky' %}Өтө чоң{% else %}Очень крупный{% endif %}</a>
+                        <strong>{% if request.LANGUAGE_CODE == 'en' %}Contrast{% elif request.LANGUAGE_CODE == 'ky' %}Контраст{% else %}Контраст{% endif %}</strong>
+                        <a href="{% url 'accessibility-switch' 'contrast' 'high' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.high_contrast == 'high' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}High contrast{% elif request.LANGUAGE_CODE == 'ky' %}Жогорку контраст{% else %}Высокий контраст{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'contrast' 'normal' %}?next={{ request.get_full_path|urlencode }}"{% if not request.COOKIES.high_contrast or request.COOKIES.high_contrast == 'normal' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Default contrast{% elif request.LANGUAGE_CODE == 'ky' %}Кадимки контраст{% else %}Обычный контраст{% endif %}</a>
+                    </div>
+                </details>
                 <button class="icon-button search-open desktop-search-open" type="button" aria-label="Открыть поиск" title="Поиск"><svg class="icon"><use href="#icon-search"/></svg></button>
                 {% if user.is_authenticated and request.GET.view != 'guest' %}
                     <button class="icon-button nav-mail-button" type="button" data-inbox-open aria-haspopup="dialog" aria-controls="inbox-dialog" aria-label="Почта{% if inbox_unread_count %}, непрочитанных сообщений: {{ inbox_unread_count }}{% endif %}" title="Почта"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg>{% if inbox_unread_count %}<span class="nav-mail-count" aria-hidden="true">{{ inbox_unread_count }}</span>{% endif %}</button>
@@ -59,17 +72,17 @@
                 <details class="language-picker custom-picker">
                     <summary class="picker-trigger" aria-label="Выбрать язык"><span>{{ request.LANGUAGE_CODE|upper }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></summary>
                     <div class="picker-menu" aria-label="Язык интерфейса">
-                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ru' %} is-selected{% endif %}" href="{% url 'language-switch' 'ru' %}">Русский <span>RU</span></a>
-                        <a class="picker-option{% if request.LANGUAGE_CODE == 'en' %} is-selected{% endif %}" href="{% url 'language-switch' 'en' %}">English <span>EN</span></a>
-                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ky' %} is-selected{% endif %}" href="{% url 'language-switch' 'ky' %}">Кыргызча <span>KY</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ru' %} is-selected{% endif %}" href="{% url 'language-switch' 'ru' %}?next={{ request.get_full_path|urlencode }}">Русский <span>RU</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'en' %} is-selected{% endif %}" href="{% url 'language-switch' 'en' %}?next={{ request.get_full_path|urlencode }}">English <span>EN</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ky' %} is-selected{% endif %}" href="{% url 'language-switch' 'ky' %}?next={{ request.get_full_path|urlencode }}">Кыргызча <span>KY</span></a>
                     </div>
                 </details>
                 {% if user.is_authenticated and request.GET.view != 'guest' %}
-                    <a class="login-link" href="{% url 'dashboard' %}">Кабинет</a>
-                    <form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">Выйти</button></form>
+                    <a class="login-link" href="{% url 'dashboard' %}">{% if request.LANGUAGE_CODE == 'en' %}Dashboard{% elif request.LANGUAGE_CODE == 'ky' %}Жеке кабинет{% else %}Кабинет{% endif %}</a>
+                    <form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Log out{% elif request.LANGUAGE_CODE == 'ky' %}Чыгуу{% else %}Выйти{% endif %}</button></form>
                 {% else %}
-                    <a class="login-link" href="{% url 'login' %}">Войти</a>
-                    <a class="button button-small" href="{% url 'register' %}">Регистрация</a>
+                    <a class="login-link" href="{% url 'login' %}">{% if request.LANGUAGE_CODE == 'en' %}Log in{% elif request.LANGUAGE_CODE == 'ky' %}Кирүү{% else %}Войти{% endif %}</a>
+                    <a class="button button-small" href="{% url 'register' %}">{% if request.LANGUAGE_CODE == 'en' %}Sign up{% elif request.LANGUAGE_CODE == 'ky' %}Катталуу{% else %}Регистрация{% endif %}</a>
                 {% endif %}
             </div>
             <div class="mobile-header-actions">
@@ -85,15 +98,35 @@
         </div>
         <div class="mobile-navigation" id="mobile-navigation" hidden>
             <nav aria-label="Мобильная навигация">
-                <a href="{% url 'home' %}">Главная</a>
-                <a href="{% url 'institution-list' %}">Вузы и колледжи</a>
-                <a href="{% url 'student-list' %}">Абитуриенты</a>
-                <a href="{% url 'how-to-apply' %}">Как поступить</a>
-                <a href="{% url 'about' %}">О нас</a>
+                <a href="{% url 'home' %}">{% if request.LANGUAGE_CODE == 'en' %}Home{% elif request.LANGUAGE_CODE == 'ky' %}Башкы бет{% else %}Главная{% endif %}</a>
+                <a href="{% url 'institution-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Universities & colleges{% elif request.LANGUAGE_CODE == 'ky' %}Университеттер жана колледждер{% else %}Вузы и колледжи{% endif %}</a>
+                <a href="{% url 'student-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Applicants{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттер{% else %}Абитуриенты{% endif %}</a>
+                <a href="{% url 'how-to-apply' %}">{% if request.LANGUAGE_CODE == 'en' %}How to apply{% elif request.LANGUAGE_CODE == 'ky' %}Кантип тапшыруу керек{% else %}Как поступить{% endif %}</a>
+                <a href="{% url 'about' %}">{% if request.LANGUAGE_CODE == 'en' %}About us{% elif request.LANGUAGE_CODE == 'ky' %}Биз жөнүндө{% else %}О нас{% endif %}</a>
             </nav>
             <div class="mobile-actions">
-                {% if user.is_authenticated and request.GET.view != 'guest' %}<a class="button button-outline" href="{% url 'dashboard' %}">Личный кабинет</a><form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">Выйти</button></form>{% else %}<a class="button button-outline" href="{% url 'login' %}">Войти</a><a class="button" href="{% url 'register' %}">Регистрация</a>{% endif %}
+                {% if user.is_authenticated and request.GET.view != 'guest' %}<a class="button button-outline" href="{% url 'dashboard' %}">{% if request.LANGUAGE_CODE == 'en' %}Dashboard{% elif request.LANGUAGE_CODE == 'ky' %}Жеке кабинет{% else %}Личный кабинет{% endif %}</a><form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-small" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Log out{% elif request.LANGUAGE_CODE == 'ky' %}Чыгуу{% else %}Выйти{% endif %}</button></form>{% else %}<a class="button button-outline" href="{% url 'login' %}">{% if request.LANGUAGE_CODE == 'en' %}Log in{% elif request.LANGUAGE_CODE == 'ky' %}Кирүү{% else %}Войти{% endif %}</a><a class="button" href="{% url 'register' %}">{% if request.LANGUAGE_CODE == 'en' %}Sign up{% elif request.LANGUAGE_CODE == 'ky' %}Катталуу{% else %}Регистрация{% endif %}</a>{% endif %}
                 <a class="icon-button" href="{% if request.COOKIES.theme == 'dark' %}{% url 'theme-switch' 'light' %}{% else %}{% url 'theme-switch' 'dark' %}{% endif %}?next={{ request.get_full_path|urlencode }}" aria-label="Переключить тему"><svg class="icon"><use href="{% if request.COOKIES.theme == 'dark' %}#icon-sun{% else %}#icon-moon{% endif %}"/></svg></a>
+                <details class="language-picker custom-picker mobile-language-picker">
+                    <summary class="picker-trigger" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Choose language{% elif request.LANGUAGE_CODE == 'ky' %}Тилди тандоо{% else %}Выбрать язык{% endif %}"><span>{{ request.LANGUAGE_CODE|upper }}</span><svg class="icon picker-chevron"><use href="#icon-chevron"/></svg></summary>
+                    <div class="picker-menu" aria-label="Язык интерфейса">
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ru' %} is-selected{% endif %}" href="{% url 'language-switch' 'ru' %}?next={{ request.get_full_path|urlencode }}">Русский <span>RU</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'en' %} is-selected{% endif %}" href="{% url 'language-switch' 'en' %}?next={{ request.get_full_path|urlencode }}">English <span>EN</span></a>
+                        <a class="picker-option{% if request.LANGUAGE_CODE == 'ky' %} is-selected{% endif %}" href="{% url 'language-switch' 'ky' %}?next={{ request.get_full_path|urlencode }}">Кыргызча <span>KY</span></a>
+                    </div>
+                </details>
+                <details class="accessibility-menu mobile-accessibility-menu">
+                    <summary class="accessibility-menu-trigger" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Accessibility settings{% elif request.LANGUAGE_CODE == 'ky' %}Жеткиликтүүлүк жөндөөлөрү{% else %}Версия для слабовидящих: настройки доступности{% endif %}">Aa</summary>
+                    <div class="accessibility-menu-panel">
+                        <strong>{% if request.LANGUAGE_CODE == 'en' %}Text size{% elif request.LANGUAGE_CODE == 'ky' %}Тексттин өлчөмү{% else %}Размер текста{% endif %}</strong>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'normal' %}?next={{ request.get_full_path|urlencode }}"{% if not request.COOKIES.font_size or request.COOKIES.font_size == 'normal' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Default{% elif request.LANGUAGE_CODE == 'ky' %}Кадимки{% else %}Обычный{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'large' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.font_size == 'large' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Large{% elif request.LANGUAGE_CODE == 'ky' %}Чоң{% else %}Крупный{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'font-size' 'larger' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.font_size == 'larger' %} aria-current="true"{% endif %}>{% if request.COOKIES.font_size == 'larger' %}XXL{% elif request.LANGUAGE_CODE == 'en' %}Extra large{% elif request.LANGUAGE_CODE == 'ky' %}Өтө чоң{% else %}Очень крупный{% endif %}</a>
+                        <strong>{% if request.LANGUAGE_CODE == 'en' %}Contrast{% elif request.LANGUAGE_CODE == 'ky' %}Контраст{% else %}Контраст{% endif %}</strong>
+                        <a href="{% url 'accessibility-switch' 'contrast' 'high' %}?next={{ request.get_full_path|urlencode }}"{% if request.COOKIES.high_contrast == 'high' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}High contrast{% elif request.LANGUAGE_CODE == 'ky' %}Жогорку контраст{% else %}Высокий контраст{% endif %}</a>
+                        <a href="{% url 'accessibility-switch' 'contrast' 'normal' %}?next={{ request.get_full_path|urlencode }}"{% if not request.COOKIES.high_contrast or request.COOKIES.high_contrast == 'normal' %} aria-current="true"{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Default contrast{% elif request.LANGUAGE_CODE == 'ky' %}Кадимки контраст{% else %}Обычный контраст{% endif %}</a>
+                    </div>
+                </details>
             </div>
         </div>
     </header>
@@ -102,39 +135,39 @@
         <div class="footer-grid">
             <div class="footer-brand-column">
                 <a class="brand" href="{% url 'home' %}"><span class="brand-mark"><svg class="icon"><use href="#icon-book"/></svg></span><span>Find<span class="brand-accent">Uni</span></span></a>
-                <p>Единая платформа для абитуриентов и учебных заведений по всему миру.</p>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}A single platform for applicants and educational institutions around the world.{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттер жана дүйнө жүзүндөгү окуу жайлар үчүн бирдиктүү платформа.{% else %}Единая платформа для абитуриентов и учебных заведений по всему миру.{% endif %}</p>
             </div>
-            <div><h2>Платформа</h2><a href="{% url 'institution-list' %}?type=university">Университеты</a><a href="{% url 'institution-list' %}?type=college9">Колледжи</a><a href="{% url 'student-list' %}">Абитуриенты</a></div>
-            <div><h2>Помощь</h2><a href="{% url 'how-to-apply' %}">Как поступить</a><a href="{% url 'about' %}#faq">Вопросы и ответы</a></div>
-            <div><h2>Информация</h2><a href="{% url 'about' %}">О нас</a></div>
+            <div><h2>{% if request.LANGUAGE_CODE == 'en' %}Platform{% elif request.LANGUAGE_CODE == 'ky' %}Платформа{% else %}Платформа{% endif %}</h2><a href="{% url 'institution-list' %}?type=university">{% if request.LANGUAGE_CODE == 'en' %}Universities{% elif request.LANGUAGE_CODE == 'ky' %}Университеттер{% else %}Университеты{% endif %}</a><a href="{% url 'institution-list' %}?type=college9">{% if request.LANGUAGE_CODE == 'en' %}Colleges{% elif request.LANGUAGE_CODE == 'ky' %}Колледждер{% else %}Колледжи{% endif %}</a><a href="{% url 'student-list' %}">{% if request.LANGUAGE_CODE == 'en' %}Applicants{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттер{% else %}Абитуриенты{% endif %}</a></div>
+            <div><h2>{% if request.LANGUAGE_CODE == 'en' %}Help{% elif request.LANGUAGE_CODE == 'ky' %}Жардам{% else %}Помощь{% endif %}</h2><a href="{% url 'how-to-apply' %}">{% if request.LANGUAGE_CODE == 'en' %}How to apply{% elif request.LANGUAGE_CODE == 'ky' %}Кантип тапшыруу керек{% else %}Как поступить{% endif %}</a><a href="{% url 'about' %}#faq">{% if request.LANGUAGE_CODE == 'en' %}FAQ{% elif request.LANGUAGE_CODE == 'ky' %}Көп берилген суроолор{% else %}Вопросы и ответы{% endif %}</a></div>
+            <div><h2>{% if request.LANGUAGE_CODE == 'en' %}Information{% elif request.LANGUAGE_CODE == 'ky' %}Маалымат{% else %}Информация{% endif %}</h2><a href="{% url 'about' %}">{% if request.LANGUAGE_CODE == 'en' %}About us{% elif request.LANGUAGE_CODE == 'ky' %}Биз жөнүндө{% else %}О нас{% endif %}</a></div>
         </div>
-        <div class="footer-bottom"><span>© 2026 FindUni. Демонстрационный проект.</span><span>Сделано для будущего образования</span></div>
+        <div class="footer-bottom"><span>© 2026 FindUni. {% if request.LANGUAGE_CODE == 'en' %}Demo project.{% elif request.LANGUAGE_CODE == 'ky' %}Демо долбоор.{% else %}Демонстрационный проект.{% endif %}</span><span>{% if request.LANGUAGE_CODE == 'en' %}Made for the future of education{% elif request.LANGUAGE_CODE == 'ky' %}Билим берүүнүн келечеги үчүн жасалды{% else %}Сделано для будущего образования{% endif %}</span></div>
     </footer>
     <dialog class="search-dialog" id="site-search" aria-labelledby="search-dialog-title">
         <div class="search-dialog-shell">
             <form class="search-dialog-form" id="site-search-form" data-institutions-url="{% url 'institution-list' %}" data-students-url="{% url 'student-list' %}">
                 <svg class="icon search-dialog-leading-icon"><use href="#icon-search"/></svg>
-                <label class="visually-hidden" id="search-dialog-title" for="site-search-input">Что ищем?</label>
-                <input id="site-search-input" name="q" type="search" placeholder="Что ищем?" autocomplete="off">
-                <button class="search-dialog-clear" type="button" aria-label="Очистить запрос" hidden><svg class="icon"><use href="#icon-x"/></svg></button>
-                <button class="search-dialog-close" type="button" aria-label="Закрыть поиск"><svg class="icon"><use href="#icon-x"/></svg></button>
+                <label class="visually-hidden" id="search-dialog-title" for="site-search-input">{% if request.LANGUAGE_CODE == 'en' %}What are you looking for?{% elif request.LANGUAGE_CODE == 'ky' %}Эмнени издеп жатасыз?{% else %}Что ищем?{% endif %}</label>
+                <input id="site-search-input" name="q" type="search" placeholder="{% if request.LANGUAGE_CODE == 'en' %}What are you looking for?{% elif request.LANGUAGE_CODE == 'ky' %}Эмнени издеп жатасыз?{% else %}Что ищем?{% endif %}" autocomplete="off">
+                <button class="search-dialog-clear" type="button" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Clear query{% elif request.LANGUAGE_CODE == 'ky' %}Суроону тазалоо{% else %}Очистить запрос{% endif %}" hidden><svg class="icon"><use href="#icon-x"/></svg></button>
+                <button class="search-dialog-close" type="button" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Close search{% elif request.LANGUAGE_CODE == 'ky' %}Издөөнү жабуу{% else %}Закрыть поиск{% endif %}"><svg class="icon"><use href="#icon-x"/></svg></button>
             </form>
             <div class="search-dialog-content">
-                <section class="search-panel-section" aria-label="Раздел поиска">
-                    <div class="search-scope-list" role="group" aria-label="Искать в разделе">
-                        <button class="search-scope-chip is-active" type="button" data-search-scope="university" aria-pressed="true">Университет</button>
-                        <button class="search-scope-chip" type="button" data-search-scope="college" aria-pressed="false">Колледж</button>
-                        <button class="search-scope-chip" type="button" data-search-scope="student" aria-pressed="false">Абитуриент</button>
+                <section class="search-panel-section" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Search section{% elif request.LANGUAGE_CODE == 'ky' %}Издөө бөлүмү{% else %}Раздел поиска{% endif %}">
+                    <div class="search-scope-list" role="group" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Search in{% elif request.LANGUAGE_CODE == 'ky' %}Издөө жайы{% else %}Искать в разделе{% endif %}">
+                        <button class="search-scope-chip is-active" type="button" data-search-scope="university" aria-pressed="true">{% if request.LANGUAGE_CODE == 'en' %}University{% elif request.LANGUAGE_CODE == 'ky' %}Университет{% else %}Университет{% endif %}</button>
+                        <button class="search-scope-chip" type="button" data-search-scope="college" aria-pressed="false">{% if request.LANGUAGE_CODE == 'en' %}College{% elif request.LANGUAGE_CODE == 'ky' %}Колледж{% else %}Колледж{% endif %}</button>
+                        <button class="search-scope-chip" type="button" data-search-scope="student" aria-pressed="false">{% if request.LANGUAGE_CODE == 'en' %}Applicant{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриент{% else %}Абитуриент{% endif %}</button>
                     </div>
                 </section>
                 <section class="search-panel-section search-history-section" aria-labelledby="search-history-title">
-                    <div class="search-section-heading"><h2 id="search-history-title">История поиска</h2><button class="search-history-clear" type="button" hidden>Очистить</button></div>
+                    <div class="search-section-heading"><h2 id="search-history-title">{% if request.LANGUAGE_CODE == 'en' %}Search history{% elif request.LANGUAGE_CODE == 'ky' %}Издөө тарыхы{% else %}История поиска{% endif %}</h2><button class="search-history-clear" type="button" hidden>{% if request.LANGUAGE_CODE == 'en' %}Clear{% elif request.LANGUAGE_CODE == 'ky' %}Тазалоо{% else %}Очистить{% endif %}</button></div>
                     <div class="search-history-list" id="search-history-list" aria-live="polite"></div>
-                    <p class="search-empty-state" id="search-history-empty">Недавние запросы появятся здесь.</p>
+                    <p class="search-empty-state" id="search-history-empty">{% if request.LANGUAGE_CODE == 'en' %}Recent searches will appear here.{% elif request.LANGUAGE_CODE == 'ky' %}Акыркы издөөлөр бул жерде көрүнөт.{% else %}Недавние запросы появятся здесь.{% endif %}</p>
                 </section>
                 <section class="search-panel-section" aria-labelledby="popular-search-title">
-                    <h2 id="popular-search-title">Чаще всего ищут</h2>
-                    <p class="search-empty-state">Популярные запросы появятся здесь.</p>
+                    <h2 id="popular-search-title">{% if request.LANGUAGE_CODE == 'en' %}Popular searches{% elif request.LANGUAGE_CODE == 'ky' %}Популярдуу издөөлөр{% else %}Чаще всего ищут{% endif %}</h2>
+                    <p class="search-empty-state">{% if request.LANGUAGE_CODE == 'en' %}Popular searches will appear here.{% elif request.LANGUAGE_CODE == 'ky' %}Популярдуу издөөлөр бул жерде көрүнөт.{% else %}Популярные запросы появятся здесь.{% endif %}</p>
                 </section>
             </div>
         </div>
@@ -143,17 +176,17 @@
         <dialog class="inbox-dialog" id="inbox-dialog" aria-labelledby="inbox-dialog-title">
             <div class="inbox-dialog-shell">
                 <header class="inbox-dialog-header">
-                    <div><p class="section-kicker">Сообщения и уведомления</p><h2 id="inbox-dialog-title">Почта</h2></div>
-                    <button class="icon-button inbox-dialog-close" type="button" aria-label="Закрыть почту"><svg class="icon" aria-hidden="true"><use href="#icon-x"/></svg></button>
+                    <div><p class="section-kicker">{% if request.LANGUAGE_CODE == 'en' %}Messages and notifications{% elif request.LANGUAGE_CODE == 'ky' %}Билдирүүлөр жана эскертмелер{% else %}Сообщения и уведомления{% endif %}</p><h2 id="inbox-dialog-title">{% if request.LANGUAGE_CODE == 'en' %}Inbox{% elif request.LANGUAGE_CODE == 'ky' %}Каттар{% else %}Почта{% endif %}</h2></div>
+                    <button class="icon-button inbox-dialog-close" type="button" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Close inbox{% elif request.LANGUAGE_CODE == 'ky' %}Каттарды жабуу{% else %}Закрыть почту{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-x"/></svg></button>
                 </header>
                 <div class="inbox-toolbar">
                     <form method="post" action="{% url 'inbox-delete-all' %}">
                         {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        <button class="button button-outline" type="submit" {% if not inbox_notifications %}disabled{% endif %}>Удалить всю почту</button>
+                        <button class="button button-outline" type="submit" {% if not inbox_notifications %}disabled{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Delete all messages{% elif request.LANGUAGE_CODE == 'ky' %}Бардык каттарды өчүрүү{% else %}Удалить всю почту{% endif %}</button>
                     </form>
                     <form method="post" action="{% url 'inbox-mark-read' %}">
                         {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        <button class="button button-outline" type="submit" {% if not inbox_unread_count %}disabled{% endif %}>Отметить прочитанным</button>
+                        <button class="button button-outline" type="submit" {% if not inbox_unread_count %}disabled{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Mark all as read{% elif request.LANGUAGE_CODE == 'ky' %}Баарын окулду деп белгилөө{% else %}Отметить прочитанным{% endif %}</button>
                     </form>
                 </div>
                 <div class="inbox-message-list">
@@ -169,30 +202,30 @@
                                     {% with sender_name=notification.actor.student_profile.full_name|default:notification.actor.institution_profile.name|default:notification.actor.get_full_name|default:notification.actor.get_role_display %}
                                         <h3>{{ sender_name }}</h3>
                                     {% endwith %}
-                                {% else %}<h3>Администрация FindUni</h3>{% endif %}
+                                {% else %}<h3>{% if request.LANGUAGE_CODE == 'en' %}FindUni administration{% elif request.LANGUAGE_CODE == 'ky' %}FindUni администрациясы{% else %}Администрация FindUni{% endif %}</h3>{% endif %}
                                 <div class="inbox-message-meta"><span>{{ notification.get_kind_display }}</span><time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|date:'j E Y, H:i' }}</time></div>
                                 <h4 class="inbox-message-subject">{{ notification.title }}</h4>
                                 <p>{{ notification.body }}</p>
-                                {% if notification.application %}<a class="inbox-message-link" href="{% url 'application-detail' notification.application_id %}">Открыть заявление и профиль абитуриента</a>
-                                {% elif notification.comment %}<a class="inbox-message-link" href="{% url 'student-detail' notification.comment.profile_id %}#comment-{{ notification.comment_id }}">Открыть комментарий</a>
-                                {% elif notification.friendship and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">Перейти в профиль</a>
-                                {% elif notification.follow and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">Посмотреть профиль абитуриента</a>{% endif %}
+                                {% if notification.application %}<a class="inbox-message-link" href="{% url 'application-detail' notification.application_id %}">{% if request.LANGUAGE_CODE == 'en' %}View application and applicant profile{% elif request.LANGUAGE_CODE == 'ky' %}Арызды жана абитуриенттин профилин көрүү{% else %}Открыть заявление и профиль абитуриента{% endif %}</a>
+                                {% elif notification.comment %}<a class="inbox-message-link" href="{% url 'student-detail' notification.comment.profile_id %}#comment-{{ notification.comment_id }}">{% if request.LANGUAGE_CODE == 'en' %}View comment{% elif request.LANGUAGE_CODE == 'ky' %}Комментарийди көрүү{% else %}Открыть комментарий{% endif %}</a>
+                                {% elif notification.friendship and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">{% if request.LANGUAGE_CODE == 'en' %}View profile{% elif request.LANGUAGE_CODE == 'ky' %}Профилди көрүү{% else %}Перейти в профиль{% endif %}</a>
+                                {% elif notification.follow and notification.actor.student_profile %}<a class="inbox-message-link" href="{% url 'student-detail' notification.actor.student_profile.pk %}">{% if request.LANGUAGE_CODE == 'en' %}View applicant profile{% elif request.LANGUAGE_CODE == 'ky' %}Абитуриенттин профилин көрүү{% else %}Посмотреть профиль абитуриента{% endif %}</a>{% endif %}
                                 {% if notification.friendship.status == 'pending' and notification.friendship.to_student_id == user.pk %}
-                                    <form class="inbox-accept-form" method="post" action="{% url 'manage-friend' notification.actor_id %}">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="button button-small" type="submit">Принять запрос дружбы</button></form>
+                                    <form class="inbox-accept-form" method="post" action="{% url 'manage-friend' notification.actor_id %}">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="button button-small" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Accept friend request{% elif request.LANGUAGE_CODE == 'ky' %}Достук сурамын кабыл алуу{% else %}Принять запрос дружбы{% endif %}</button></form>
                                 {% endif %}
                             </div>
                             <div class="inbox-message-actions">
-                                <form method="post" action="{% url 'notification-delete' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="Удалить сообщение" title="Удалить"><svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg></button></form>
-                                {% if not notification.is_read %}<form method="post" action="{% url 'notification-mark-read' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="Отметить прочитанным" title="Отметить прочитанным"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg></button></form>{% endif %}
+                                <form method="post" action="{% url 'notification-delete' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Delete message{% elif request.LANGUAGE_CODE == 'ky' %}Катты өчүрүү{% else %}Удалить сообщение{% endif %}" title="{% if request.LANGUAGE_CODE == 'en' %}Delete{% elif request.LANGUAGE_CODE == 'ky' %}Өчүрүү{% else %}Удалить{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg></button></form>
+                                {% if not notification.is_read %}<form method="post" action="{% url 'notification-mark-read' notification.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="inbox-action-button" type="submit" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Mark as read{% elif request.LANGUAGE_CODE == 'ky' %}Окулду деп белгилөө{% else %}Отметить прочитанным{% endif %}" title="{% if request.LANGUAGE_CODE == 'en' %}Mark as read{% elif request.LANGUAGE_CODE == 'ky' %}Окулду деп белгилөө{% else %}Отметить прочитанным{% endif %}"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg></button></form>{% endif %}
                             </div>
                         </article>
                     {% empty %}
-                        <p class="inbox-empty-state">Сейчас у вас нет почты.</p>
+                        <p class="inbox-empty-state">{% if request.LANGUAGE_CODE == 'en' %}Your inbox is empty.{% elif request.LANGUAGE_CODE == 'ky' %}Катыңыз жок.{% else %}Сейчас у вас нет почты.{% endif %}</p>
                     {% endfor %}
                 </div>
             </div>
         </dialog>
     {% endif %}
-    <script src="{% static 'js/home.js' %}?v=5" defer></script>
+    <script src="{% static 'js/home.js' %}?v=6" defer></script>
 </body>
 </html>

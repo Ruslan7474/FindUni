@@ -19,6 +19,7 @@ class Institution(models.Model):
     phone = models.CharField(max_length=40, blank=True)
     email = models.EmailField(blank=True)
     logo = models.ImageField(upload_to='logos/', blank=True)
+    logo_url = models.URLField(blank=True)
     approved = models.BooleanField(default=False)
     rating = models.FloatField(default=0)
     rating_count = models.PositiveIntegerField(default=0)
@@ -69,7 +70,8 @@ class ProgramDocumentRequirement(models.Model):
 
 class InstitutionPhoto(models.Model):
     institution = models.ForeignKey(Institution, related_name='photos', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='institution-photos/')
+    image = models.ImageField(upload_to='institution-photos/', blank=True)
+    image_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

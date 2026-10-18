@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.translation import get_language
 from institutions.models import Institution
 from students.models import StudentProfile
 
@@ -44,15 +45,37 @@ class RegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        language = get_language()
         selected_role = self.data.get('role') if self.is_bound else self.initial.get('role', 'student')
         self.fields['last_name'].required = selected_role != 'institution'
-        if selected_role == 'institution':
+        if language == 'en':
+            self.fields['role'].label = 'Account type'
+            self.fields['role'].choices = (('student', 'Applicant'), ('institution', 'Educational institution'))
+            self.fields['name'].label = 'Institution name' if selected_role == 'institution' else 'First name'
+            self.fields['last_name'].label = 'Last name'
+            self.fields['email'].label = 'Email'
+            self.fields['password1'].label = 'Password'
+            self.fields['password2'].label = 'Confirm password'
+            self.fields['password1'].error_messages['required'] = 'Enter a password.'
+            self.fields['password2'].error_messages['required'] = 'Confirm your password.'
+        elif language == 'ky':
+            self.fields['role'].label = 'Аккаунттун түрү'
+            self.fields['role'].choices = (('student', 'Абитуриент'), ('institution', 'Окуу жай'))
+            self.fields['name'].label = 'Окуу жайдын аталышы' if selected_role == 'institution' else 'Аты'
+            self.fields['last_name'].label = 'Фамилиясы'
+            self.fields['email'].label = 'Email'
+            self.fields['password1'].label = 'Сырсөз'
+            self.fields['password2'].label = 'Сырсөздү ырастоо'
+            self.fields['password1'].error_messages['required'] = 'Сырсөздү киргизиңиз.'
+            self.fields['password2'].error_messages['required'] = 'Сырсөздү ырастаңыз.'
+        elif selected_role == 'institution':
             self.fields['name'].label = 'Название учебного заведения'
-        self.fields['email'].label = 'Email'
-        self.fields['password1'].label = 'Пароль'
-        self.fields['password2'].label = 'Подтверждение пароля'
-        self.fields['password1'].error_messages['required'] = 'Укажите пароль.'
-        self.fields['password2'].error_messages['required'] = 'Подтвердите пароль.'
+        if language == 'ru':
+            self.fields['email'].label = 'Email'
+            self.fields['password1'].label = 'Пароль'
+            self.fields['password2'].label = 'Подтверждение пароля'
+            self.fields['password1'].error_messages['required'] = 'Укажите пароль.'
+            self.fields['password2'].error_messages['required'] = 'Подтвердите пароль.'
         self.fields['password1'].help_text = ''
         self.fields['password2'].help_text = ''
         self.order_fields(('role', 'name', 'last_name', 'email', 'password1', 'password2'))
